@@ -14,11 +14,9 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Simulate loading posts
-    const timer = setTimeout(() => {
-      setPosts([...mockPosts].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()))
-      setLoading(false)
-    }, 500)
+    // Immediate loading of posts
+    setPosts([...mockPosts].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()))
+    setLoading(false)
 
     // Load from localStorage if available
     const saved = localStorage.getItem('jobLinkrPosts')
@@ -30,7 +28,6 @@ export default function Home() {
         }))
         setPosts(savedPosts)
         setLoading(false)
-        clearTimeout(timer)
       } catch (e) {
         // Ignore parse errors
       }

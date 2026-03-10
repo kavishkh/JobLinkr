@@ -34,11 +34,9 @@ export default function SettingsPage() {
         e.preventDefault()
         setIsLoading(true)
 
-        // Simulate API call
-        setTimeout(() => {
-            setIsLoading(false)
-            toast.success('Profile updated successfully')
-        }, 1000)
+        // Save instantly
+        setIsLoading(false)
+        toast.success('Profile updated successfully')
     }
 
     const handleSavePreferences = () => {

@@ -14,7 +14,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "clean": "Get-Process node | Stop-Process -Force; Remove-Item -Recurse -Force .next"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
