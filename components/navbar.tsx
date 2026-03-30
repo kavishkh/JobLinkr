@@ -18,6 +18,7 @@ export default function Navbar() {
     { label: 'Explore', href: '/' },
     { label: 'Jobs', href: '/jobs' },
     { label: 'AI Matcher', href: '/matcher' },
+    { label: 'Resume Analyzer', href: '/profile/analyzer' },
     { label: 'Employer Hub', href: '/employer' },
   ]
 

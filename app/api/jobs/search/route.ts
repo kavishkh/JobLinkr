@@ -53,8 +53,8 @@ export async function GET(request: NextRequest) {
     let externalJobs = []
     if (externalResponse.ok) {
       const data = await externalResponse.json()
-      externalJobs = data.data?.map((job: any) => ({
-        id: `ext-${job.id}`,
+      externalJobs = data.data?.map((job: any, index: number) => ({
+        id: job.id ? `ext-${job.id}` : `ext-${Date.now()}-${index}`,
         title: job.title,
         company: job.company_name,
         companyLogo: `https://api.dicebear.com/7.x/initials/svg?seed=${job.company_name}`,

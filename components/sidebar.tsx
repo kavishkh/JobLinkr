@@ -11,6 +11,7 @@ import {
   LogOut,
   Sparkles,
   Building2,
+  FileText,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -30,6 +31,7 @@ const sidebarItems = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/jobs', label: 'Browse Jobs', icon: Briefcase },
   { href: '/matcher', label: 'AI Matcher', icon: Sparkles },
+  { href: '/profile/analyzer', label: 'Resume Analyzer', icon: FileText },
   { href: '/profile', label: 'My Profile', icon: Users },
   { href: '/employer', label: 'Employer Hub', icon: Building2 },
   { href: '/saved', label: 'Saved', icon: Heart },
