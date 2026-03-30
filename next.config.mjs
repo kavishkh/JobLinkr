@@ -3,8 +3,8 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  reactCompiler: true,
   experimental: {
-    reactCompiler: true,
     optimizePackageImports: ['lucide-react', '@radix-ui/react-avatar', '@radix-ui/react-dialog', 'sonner', 'date-fns', 'recharts']
   },
   images: {

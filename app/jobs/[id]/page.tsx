@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { mockJobs, mockApplications } from '@/lib/mockData'
+import { useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import {
@@ -18,13 +18,136 @@ import {
 } from 'lucide-react'
 import Navbar from '@/components/navbar'
 import { Sidebar } from '@/components/sidebar'
+import { ApplicationModal } from '@/components/application-modal'
+import { useToast } from '@/hooks/use-toast'
 
-export default function JobDetail({ params }: { params: { id: string } }) {
-  const job = mockJobs.find((j) => j.id === params.id)
+interface Job {
+  id: string
+  title: string
+  company: string
+  companyLogo: string
+  location: string
+  level: 'Entry' | 'Mid' | 'Senior'
+  type: 'Full-time' | 'Contract' | 'Freelance'
+  salary?: { min: number; max: number; currency: string }
+  description: string
+  skills: string[]
+  posted: string | Date
+  applicants?: number
+  source?: string
+  url?: string
+}
+
+export default function JobDetail() {
+  const params = useParams()
+  const jobId = params.id as string
+  const [job, setJob] = useState<Job | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const [isSaved, setIsSaved] = useState(false)
-  const [isApplied, setIsApplied] = useState(
-    mockApplications.some((app) => app.jobId === params.id)
-  )
+  const [isApplied, setIsApplied] = useState(false)
+  const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false)
+  const { toast } = useToast()
+
+  useEffect(() => {
+    if (!jobId) return
+
+    const fetchJob = async () => {
+      try {
+        const response = await fetch(`/api/jobs/search?q=&limit=100`)
+        const data = await response.json()
+        
+        if (response.ok) {
+          const foundJob = data.jobs.find((j: Job) => j.id === jobId)
+          if (foundJob) {
+            setJob(foundJob)
+            
+            // Check if already applied
+            const appResponse = await fetch(`/api/applications?jobId=${jobId}`)
+            const appData = await appResponse.json()
+            if (appData.applications && appData.applications.length > 0) {
+              setIsApplied(true)
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching job:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchJob()
+  }, [jobId])
+
+  const handleApplyClick = () => {
+    setIsApplicationModalOpen(true)
+  }
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: job?.title || 'Job Opportunity',
+          text: `Check out this ${job?.title} position at ${job?.company}`,
+          url: window.location.href
+        })
+        toast({
+          title: 'Shared!',
+          description: 'Job shared successfully.',
+        })
+      } catch (error) {
+        console.error('Error sharing:', error)
+      }
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(window.location.href)
+      toast({
+        title: 'Copied!',
+        description: 'Link copied to clipboard.',
+      })
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-background">
+        <Navbar />
+        <div className="flex gap-8">
+          <Sidebar />
+          <div className="flex-1 w-full px-6 py-8">
+            <div className="animate-pulse space-y-4">
+              <div className="h-10 bg-muted rounded w-32"></div>
+              <div className="h-64 bg-muted rounded"></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  if (!job) {
+    return (
+      <main className="min-h-screen bg-background">
+        <Navbar />
+        <div className="flex gap-8">
+          <Sidebar />
+          <div className="flex-1 w-full px-6 py-8">
+            <Link href="/jobs">
+              <Button variant="outline" className="gap-2">
+                <ArrowLeft className="w-4 h-4" />
+                Back to Jobs
+              </Button>
+            </Link>
+            <div className="mt-8 text-center">
+              <p className="text-lg text-muted-foreground">Job not found</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  const postedDate = typeof job.posted === 'string' ? new Date(job.posted) : job.posted
 
   if (!job) {
     return (
@@ -112,7 +235,7 @@ export default function JobDetail({ params }: { params: { id: string } }) {
                 <Button
                   size="lg"
                   className="w-full"
-                  onClick={() => setIsApplied(!isApplied)}
+                  onClick={handleApplyClick}
                   variant={isApplied ? 'outline' : 'default'}
                 >
                   {isApplied ? (
@@ -191,9 +314,9 @@ export default function JobDetail({ params }: { params: { id: string } }) {
                   {job.company} is a leading technology company known for
                   innovation and excellence in the industry.
                 </p>
-                <Button variant="outline" className="w-full">
-                  Visit Company
-                </Button>
+              <Button variant="outline" className="w-full" onClick={() => job.url && window.open(job.url, '_blank')}>
+                Visit Company
+              </Button>
               </Card>
 
               {/* Job Stats */}
@@ -202,7 +325,7 @@ export default function JobDetail({ params }: { params: { id: string } }) {
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Posted</p>
-                    <p className="font-medium">{job.posted.toLocaleDateString()}</p>
+                    <p className="font-medium">{postedDate.toLocaleDateString()}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">
@@ -227,31 +350,24 @@ export default function JobDetail({ params }: { params: { id: string } }) {
               <Card className="p-6">
                 <h3 className="text-lg font-semibold mb-4">Similar Jobs</h3>
                 <div className="space-y-3">
-                  {mockJobs
-                    .filter(
-                      (j) => j.id !== job.id
-                    )
-                    .slice(0, 2)
-                    .map((j) => (
-                      <Link
-                        key={j.id}
-                        href={`/jobs/${j.id}`}
-                        className="block p-3 rounded-lg hover:bg-muted transition-colors group"
-                      >
-                        <p className="font-medium text-sm group-hover:text-primary transition-colors">
-                          {j.title}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {j.company}
-                        </p>
-                      </Link>
-                    ))}
+                  <p className="text-sm text-muted-foreground">
+                    Check the <Link href="/jobs" className="text-primary hover:underline">jobs page</Link> for more opportunities.
+                  </p>
                 </div>
               </Card>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Application Modal */}
+      <ApplicationModal
+        isOpen={isApplicationModalOpen}
+        onClose={() => setIsApplicationModalOpen(false)}
+        jobId={job.id}
+        jobTitle={job.title}
+        companyName={job.company}
+      />
     </main>
   )
 }

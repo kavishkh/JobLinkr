@@ -1,18 +1,34 @@
 'use client'
 
 import Link from 'next/link'
-import { Job } from '@/lib/mockData'
 import { formatDistanceToNow } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { MapPin, Briefcase, Users, DollarSign, Clock } from 'lucide-react'
 
-interface JobCardProps {
-  job: Job
+interface Job {
+  id: string
+  title: string
+  company: string
+  companyLogo: string
+  location: string
+  level: 'Entry' | 'Mid' | 'Senior'
+  type: 'Full-time' | 'Contract' | 'Freelance'
+  salary?: { min: number; max: number; currency: string }
+  description: string
+  skills: string[]
+  posted: string | Date
+  applicants?: number
+  source?: string
 }
 
-export function JobCard({ job }: JobCardProps) {
+interface JobCardProps {
+  job: Job
+  onApply?: (job: Job) => void
+}
+
+export function JobCard({ job, onApply }: JobCardProps) {
   const getLevelColor = (level: string) => {
     switch (level) {
       case 'Entry':
@@ -58,6 +74,9 @@ export function JobCard({ job }: JobCardProps) {
               className="bg-primary hover:bg-primary/90 text-white flex-shrink-0"
               onClick={(e) => {
                 e.preventDefault()
+                if (onApply) {
+                  onApply(job)
+                }
               }}
             >
               Apply
