@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -20,6 +22,7 @@ import {
   Loader2,
   Settings2,
   Globe,
+  Lock,
 } from 'lucide-react'
 import Navbar from '@/components/navbar'
 import { Sidebar } from '@/components/sidebar'
@@ -59,6 +62,8 @@ interface MatchResult {
 }
 
 export default function MatcherPage() {
+  const { data: session, status: authStatus } = useSession()
+  const router = useRouter()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [liked, setLiked] = useState<string[]>([])
   const [passed, setPassed] = useState<string[]>([])
@@ -71,6 +76,56 @@ export default function MatcherPage() {
   const [experienceLevel, setExperienceLevel] = useState<string>('Mid')
   const [matches, setMatches] = useState<MatchResult[]>([])
   const [aiAnalysis, setAiAnalysis] = useState<any>(null)
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (authStatus === 'unauthenticated') {
+      router.push('/login')
+    }
+  }, [authStatus, router])
+
+  // Show loading while checking auth
+  if (authStatus === 'loading') {
+    return (
+      <main className="min-h-screen bg-background w-full flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </main>
+    )
+  }
+
+  // Show auth required message if not authenticated
+  if (authStatus === 'unauthenticated') {
+    return (
+      <main className="min-h-screen bg-background w-full">
+        <Navbar />
+        <div className="flex gap-4">
+          <Sidebar />
+          <div className="flex-1 w-full px-4 py-8 flex items-center justify-center">
+            <Card className="p-8 text-center shadow-lg max-w-md w-full">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Lock className="w-8 h-8 text-primary" />
+              </div>
+              <h2 className="text-xl font-bold mb-2">Authentication Required</h2>
+              <p className="text-sm text-muted-foreground mb-6">
+                Please sign in or create an account to use the AI Matcher feature.
+              </p>
+              <div className="flex gap-3">
+                <Button variant="outline" className="flex-1" onClick={() => router.push('/login')}>
+                  Log In
+                </Button>
+                <Button className="flex-1" onClick={() => router.push('/signup')}>
+                  Sign Up
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </main>
+    )
+  }
 
   const currentMatch = matches[currentIndex]
   const currentJob = currentMatch?.job

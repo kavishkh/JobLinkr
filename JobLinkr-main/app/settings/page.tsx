@@ -14,17 +14,16 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useSession } from 'next-auth/react'
 
 export default function SettingsPage() {
+    const { data: session } = useSession()
     const [activeTab, setActiveTab] = useState('profile')
     const [isLoading, setIsLoading] = useState(false)
     const [formData, setFormData] = useState({
-        name: currentUser.name,
-        email: 'alex.johnson@example.com', // Mock email as it's not in currentUser
+        name: session?.user?.name || currentUser.name,
+        email: session?.user?.email || 'alex.johnson@example.com',
         headline: currentUser.headline,
         location: currentUser.location || '',
         about: currentUser.about || ''
     })
-
-    const { data: session } = useSession()
 
     // Mock toggle states
     const [notifications, setNotifications] = useState({
@@ -108,8 +107,10 @@ export default function SettingsPage() {
                                         <form onSubmit={handleSaveProfile} className="space-y-6">
                                             <div className="flex items-center gap-6">
                                                 <Avatar className="w-20 h-20">
-                                                    <AvatarImage src={session?.user?.image ?? currentUser.avatar} />
-                                                    <AvatarFallback>{formData.name.charAt(0)}</AvatarFallback>
+                                                    <AvatarImage src={session?.user?.image ?? ''} />
+                                                    <AvatarFallback className="text-2xl font-bold bg-primary/10 text-primary">
+                                                        {(session?.user?.name || formData.name).charAt(0).toUpperCase()}
+                                                    </AvatarFallback>
                                                 </Avatar>
                                                 <div>
                                                     <Button variant="outline" size="sm" type="button">Change Avatar</Button>

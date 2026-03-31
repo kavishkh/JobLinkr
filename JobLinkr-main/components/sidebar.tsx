@@ -15,6 +15,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { useSession } from 'next-auth/react'
 import {
   Sidebar as SidebarUI,
   SidebarContent,
@@ -26,20 +27,30 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 
-const sidebarItems = [
+const publicSidebarItems = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/jobs', label: 'Browse Jobs', icon: Briefcase },
-  { href: '/matcher', label: 'AI Matcher', icon: Sparkles },
-  { href: '/profile', label: 'My Profile', icon: Users },
+  { href: '/matcher', label: 'AI Matcher', icon: Sparkles, requiresAuth: true },
   { href: '/employer', label: 'Employer Hub', icon: Building2 },
-  { href: '/saved', label: 'Saved', icon: Heart },
-  { href: '/settings', label: 'Settings', icon: Settings },
+]
+
+const authenticatedSidebarItems = [
+  { href: '/', label: 'Home', icon: Home },
+  { href: '/jobs', label: 'Browse Jobs', icon: Briefcase },
+  { href: '/matcher', label: 'AI Matcher', icon: Sparkles, requiresAuth: true },
+  { href: '/profile', label: 'My Profile', icon: Users, requiresAuth: true },
+  { href: '/employer', label: 'Employer Hub', icon: Building2 },
+  { href: '/saved', label: 'Saved', icon: Heart, requiresAuth: true },
+  { href: '/settings', label: 'Settings', icon: Settings, requiresAuth: true },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { isMobile, setOpenMobile } = useSidebar()
+  const { status } = useSession()
+  
+  const sidebarItems = status === 'authenticated' ? authenticatedSidebarItems : publicSidebarItems
 
   const handleLogout = () => {
     toast.success('Logged out successfully')
@@ -67,6 +78,17 @@ export function Sidebar() {
           {sidebarItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
+            const requiresAuth = (item as any).requiresAuth
+
+            const handleClick = (e: React.MouseEvent) => {
+              if (isMobile) setOpenMobile(false)
+              
+              // If item requires auth and user is not authenticated, redirect to login
+              if (requiresAuth && status !== 'authenticated') {
+                e.preventDefault()
+                router.push('/login')
+              }
+            }
 
             return (
               <SidebarMenuItem key={item.href}>
@@ -83,7 +105,7 @@ export function Sidebar() {
                 >
                   <Link
                     href={item.href}
-                    onClick={() => isMobile && setOpenMobile(false)}
+                    onClick={handleClick}
                   >
                     <Icon className="w-5 h-5 flex-shrink-0" />
                     <span>{item.label}</span>
@@ -95,15 +117,17 @@ export function Sidebar() {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-sidebar-border">
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-2 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent text-sm font-medium transition-colors"
-        >
-          <LogOut className="w-5 h-5" />
-          <span>Sign Out</span>
-        </button>
-      </SidebarFooter>
+      {status === 'authenticated' && (
+        <SidebarFooter className="p-4 border-t border-sidebar-border">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent text-sm font-medium transition-colors"
+          >
+            <LogOut className="w-5 h-5" />
+            <span>Sign Out</span>
+          </button>
+        </SidebarFooter>
+      )}
     </SidebarUI>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { LogOut, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -20,6 +20,7 @@ import { currentUser } from '@/lib/mockData'
 
 export default function Navbar() {
   const pathname = usePathname()
+  const router = useRouter()
   const { data: session, status } = useSession()
   const displayUser = session?.user
   const role = displayUser?.role ?? currentUser.role
@@ -27,9 +28,17 @@ export default function Navbar() {
   const navItems = [
     { label: 'Explore', href: '/' },
     { label: 'Jobs', href: '/jobs' },
-    { label: 'AI Matcher', href: '/matcher' },
+    { label: 'AI Matcher', href: '/matcher', requiresAuth: true },
     { label: 'Employer Hub', href: '/employer' },
   ]
+
+  const handleNavClick = (e: React.MouseEvent, item: typeof navItems[0]) => {
+    // If item requires auth and user is not authenticated, redirect to login
+    if ((item as any).requiresAuth && status !== 'authenticated') {
+      e.preventDefault()
+      router.push('/login')
+    }
+  }
 
   return (
     <nav className="sticky top-0 z-50 bg-primary border-b border-primary/80 w-full">
@@ -51,6 +60,7 @@ export default function Navbar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={(e) => handleNavClick(e, item)}
               className={cn(
                 "text-sm font-semibold transition-colors",
                 pathname === item.href
@@ -75,16 +85,12 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-          {status === 'authenticated' && (
+          {status === 'authenticated' && displayUser && (
             <div className="hidden lg:inline-flex items-center gap-2 mr-1">
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/50">
-                {role}
+              <span className="text-sm font-medium text-white">
+                {displayUser.name}
               </span>
             </div>
-          )}
-
-          {status === 'loading' && (
-            <div className="w-9 h-9 rounded-full bg-white/10 animate-pulse" />
           )}
 
           {status === 'unauthenticated' && (

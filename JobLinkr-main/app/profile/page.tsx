@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -20,10 +21,13 @@ import {
   Star,
   MessageSquare,
   LogOut,
+  Lock,
+  Loader2,
 } from 'lucide-react'
 
 const mockUser = {
   name: 'Alex Johnson',
+  email: 'alex@example.com',
   title: 'Senior Product Designer',
   location: 'San Francisco, CA',
   bio: 'Passionate about creating intuitive and beautiful digital experiences. Coffee enthusiast and design systems advocate.',
@@ -60,7 +64,58 @@ const mockUser = {
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
-  const { data: session } = useSession()
+  const { data: session, status: authStatus } = useSession()
+  const router = useRouter()
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (authStatus === 'unauthenticated') {
+      router.push('/login')
+    }
+  }, [authStatus, router])
+
+  // Show loading while checking auth
+  if (authStatus === 'loading') {
+    return (
+      <main className="min-h-screen bg-background w-full flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </main>
+    )
+  }
+
+  // Show auth required message if not authenticated
+  if (authStatus === 'unauthenticated') {
+    return (
+      <main className="min-h-screen bg-background w-full">
+        <Navbar />
+        <div className="flex gap-4">
+          <Sidebar />
+          <div className="flex-1 w-full px-4 py-8 flex items-center justify-center">
+            <Card className="p-8 text-center shadow-lg max-w-md w-full">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Lock className="w-8 h-8 text-primary" />
+              </div>
+              <h2 className="text-xl font-bold mb-2">Authentication Required</h2>
+              <p className="text-sm text-muted-foreground mb-6">
+                Please sign in or create an account to view your profile.
+              </p>
+              <div className="flex gap-3">
+                <Button variant="outline" className="flex-1" onClick={() => router.push('/login')}>
+                  Log In
+                </Button>
+                <Button className="flex-1" onClick={() => router.push('/signup')}>
+                  Sign Up
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </main>
+    )
+  }
 
   const handleLogout = async () => {
     await signOut({ callbackUrl: '/' })
@@ -107,12 +162,14 @@ export default function ProfilePage() {
                         className="w-full h-full object-cover rounded-full"
                       />
                     ) : (
-                      mockUser.avatar
+                      <span className="text-4xl font-bold text-primary">
+                        {(session?.user?.name || mockUser.name).charAt(0).toUpperCase()}
+                      </span>
                     )}
                   </div>
                   <div className="flex-1">
                     <h2 className="text-3xl md:text-4xl font-bold mb-2">
-                      {mockUser.name}
+                      {session?.user?.name || mockUser.name}
                     </h2>
                     <p className="text-xl text-primary font-semibold mb-3">
                       {mockUser.title}
@@ -121,6 +178,10 @@ export default function ProfilePage() {
                       <div className="flex items-center gap-2">
                         <MapPin className="w-4 h-4" />
                         {mockUser.location}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Mail className="w-4 h-4" />
+                        {session?.user?.email || mockUser.email}
                       </div>
                       <div className="flex items-center gap-2">
                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
