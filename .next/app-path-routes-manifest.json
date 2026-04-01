@@ -1,0 +1,15 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/analyze-resume/route": "/api/analyze-resume",
+  "/api/jobs/score/route": "/api/jobs/score",
+  "/api/jobs/search/route": "/api/jobs/search",
+  "/employer/page": "/employer",
+  "/jobs/[id]/page": "/jobs/[id]",
+  "/jobs/page": "/jobs",
+  "/matcher/page": "/matcher",
+  "/page": "/",
+  "/profile/page": "/profile",
+  "/saved/page": "/saved",
+  "/settings/page": "/settings"
+}
