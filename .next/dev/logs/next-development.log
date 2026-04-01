@@ -1,0 +1,23 @@
+[00:00:01.854] Server  LOG     ✓ Ready in 1185ms
+[00:00:04.192] Server  WARN    ⚠ ./tailwind.config.js
+Specified module format (EcmaScript Modules) is not matching the module format of the source code (CommonJs)
+The EcmaScript module format was specified in the package.json that is affecting this source file or by using an special extension, but it looks like that CommonJs syntax is used in the source code.
+Exports made by CommonJs syntax will lead to a runtime error, since the module is in EcmaScript mode. Either change the "type" field in the package.json or replace CommonJs syntax with EcmaScript import/export syntax in the source file.
+
+
+[00:00:04.497] Server  WARN    ⚠ ./tailwind.config.js
+Specified module format (EcmaScript Modules) is not matching the module format of the source code (CommonJs)
+The EcmaScript module format was specified in the package.json that is affecting this source file or by using an special extension, but it looks like that CommonJs syntax is used in the source code.
+Exports made by CommonJs syntax will lead to a runtime error, since the module is in EcmaScript mode. Either change the "type" field in the package.json or replace CommonJs syntax with EcmaScript import/export syntax in the source file.
+
+
+[00:00:05.445] Server  WARN    ⚠ ./tailwind.config.js
+Specified module format (EcmaScript Modules) is not matching the module format of the source code (CommonJs)
+The EcmaScript module format was specified in the package.json that is affecting this source file or by using an special extension, but it looks like that CommonJs syntax is used in the source code.
+Exports made by CommonJs syntax will lead to a runtime error, since the module is in EcmaScript mode. Either change the "type" field in the package.json or replace CommonJs syntax with EcmaScript import/export syntax in the source file.
+
+
+[00:00:05.561] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:06.985] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:00:06.985] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/jobs","route":"/jobs"}
+[00:00:06.985] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3000/jobs color: rgb(120, 120, 120) color: inherit {"dp":"/jobs","o":"http://localhost:3000/jobs","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1774844965823} /_vercel/insights/view
