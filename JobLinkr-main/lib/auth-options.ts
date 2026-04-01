@@ -1,10 +1,10 @@
 import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { findUserByEmail } from '@/lib/user-store'
+import connectDB from '@/lib/mongodb'
+import User from '@/models/User'
 import { verifyPassword } from '@/lib/password'
 
 export const authOptions: NextAuthOptions = {
-  trustHost: true,
   secret:
     process.env.NEXTAUTH_SECRET ??
     (process.env.NODE_ENV === 'development' ? 'joblinkr-dev-secret-change-me' : undefined),
@@ -24,15 +24,16 @@ export const authOptions: NextAuthOptions = {
         const password = credentials?.password
         if (!email || !password) return null
 
-        const user = await findUserByEmail(email)
-        if (!user || !verifyPassword(password, user.passwordHash)) return null
+        await connectDB()
+        const user = await User.findOne({ email: email.toLowerCase() })
+        if (!user || !verifyPassword(password, user.password)) return null
 
         return {
-          id: user.id,
+          id: user._id.toString(),
           email: user.email,
           name: user.name,
           role: user.role,
-          image: user.avatar,
+          image: user.image,
         }
       },
     }),

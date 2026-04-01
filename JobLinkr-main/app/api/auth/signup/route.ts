@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { hashPassword } from '@/lib/password'
-import { createUser } from '@/lib/user-store'
+import connectDB from '@/lib/mongodb'
+import User from '@/models/User'
 
 const signupSchema = z.object({
   name: z.string().min(1, 'Name is required').max(120),
@@ -33,28 +34,33 @@ export async function POST(request: Request) {
   const avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(`${email}|${gender}|${age}`)}&gender=${gender}&age=${age}`
 
   try {
-    const user = await createUser({
-      email: email.trim().toLowerCase(),
-      name: name.trim(),
-      passwordHash: hashPassword(password),
-      role,
-      gender,
-      age,
-      avatar,
-    })
-    return NextResponse.json({
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-    })
-  } catch (e) {
-    if (e instanceof Error && e.message === 'EMAIL_TAKEN') {
+    await connectDB()
+    
+    // Check if user already exists
+    const existingUser = await User.findOne({ email: email.trim().toLowerCase() })
+    if (existingUser) {
       return NextResponse.json(
         { error: 'An account with this email already exists' },
         { status: 409 },
       )
     }
+    
+    // Create new user
+    const user = await User.create({
+      email: email.trim().toLowerCase(),
+      name: name.trim(),
+      password: hashPassword(password),
+      role: role.toLowerCase(),
+      image: avatar,
+    })
+    
+    return NextResponse.json({
+      id: user._id.toString(),
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    })
+  } catch (e) {
     console.error(e)
     return NextResponse.json({ error: 'Could not create account' }, { status: 500 })
   }
