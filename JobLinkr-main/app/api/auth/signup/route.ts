@@ -11,6 +11,30 @@ const signupSchema = z.object({
   role: z.enum(['Seeker', 'Employer']),
   gender: z.enum(['male', 'female']),
   age: z.coerce.number().int().min(13).max(100),
+  bio: z.string().optional(),
+  location: z.string().optional(),
+  title: z.string().optional(),
+  socialLinks: z.object({
+    linkedin: z.string().optional(),
+    github: z.string().optional(),
+    portfolio: z.string().optional(),
+    twitter: z.string().optional(),
+  }).optional(),
+  skills: z.array(z.object({
+    name: z.string(),
+    level: z.string(),
+  })).optional(),
+  experience: z.array(z.object({
+    company: z.string(),
+    title: z.string(),
+    period: z.string(),
+    description: z.string(),
+  })).optional(),
+  education: z.array(z.object({
+    school: z.string(),
+    degree: z.string(),
+    year: z.string(),
+  })).optional(),
 })
 
 export async function POST(request: Request) {
@@ -29,7 +53,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: first }, { status: 400 })
   }
 
-  const { name, email, password, role, gender, age } = parsed.data
+  const { 
+    name, email, password, role, gender, age, 
+    bio, location, title, socialLinks, skills, experience, education 
+  } = parsed.data
   // Use gender + age to generate a distinct avatar per user.
   const avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(`${email}|${gender}|${age}`)}&gender=${gender}&age=${age}`
 
@@ -52,6 +79,15 @@ export async function POST(request: Request) {
       password: hashPassword(password),
       role: role.toLowerCase(),
       image: avatar,
+      gender,
+      age,
+      bio,
+      location,
+      title,
+      socialLinks,
+      skills,
+      experience,
+      education,
     })
     
     return NextResponse.json({
