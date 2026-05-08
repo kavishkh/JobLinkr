@@ -1,0 +1,15 @@
+{
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/analyze-resume/route": "app/api/analyze-resume/route.js",
+  "/api/jobs/score/route": "app/api/jobs/score/route.js",
+  "/api/jobs/search/route": "app/api/jobs/search/route.js",
+  "/employer/page": "app/employer/page.js",
+  "/jobs/[id]/page": "app/jobs/[id]/page.js",
+  "/jobs/page": "app/jobs/page.js",
+  "/matcher/page": "app/matcher/page.js",
+  "/page": "app/page.js",
+  "/profile/page": "app/profile/page.js",
+  "/saved/page": "app/saved/page.js",
+  "/settings/page": "app/settings/page.js"
+}
