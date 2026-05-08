@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth-options'
-import connectDB from '@/lib/mongodb'
-import User from '@/models/User'
+import { db } from '@/lib/firebase'
+import { collection, query, where, getDocs, doc, updateDoc, limit } from 'firebase/firestore'
 
 export async function GET() {
   try {
@@ -11,12 +11,15 @@ export async function GET() {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    await connectDB()
-    const user = await User.findOne({ email: session.user.email })
-    if (!user) {
+    const usersRef = collection(db, "users")
+    const q = query(usersRef, where("email", "==", session.user.email), limit(1))
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
+    const user = querySnapshot.docs[0].data()
     return NextResponse.json(user)
   } catch (error) {
     console.error('Error fetching profile:', error)
@@ -32,22 +35,27 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json()
-    await connectDB()
+    
+    const usersRef = collection(db, "users")
+    const q = query(usersRef, where("email", "==", session.user.email), limit(1))
+    const querySnapshot = await getDocs(q)
 
-    // Remove protected fields from the update body
-    const { _id, email, password, createdAt, updatedAt, __v, ...updateData } = body
-
-    const updatedUser = await User.findOneAndUpdate(
-      { email: session.user.email },
-      { $set: updateData },
-      { new: true }
-    )
-
-    if (!updatedUser) {
+    if (querySnapshot.empty) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    return NextResponse.json(updatedUser)
+    const userDoc = querySnapshot.docs[0]
+    const userRef = doc(db, "users", userDoc.id)
+
+    // Remove protected fields from the update body
+    const { id, email, password, createdAt, updatedAt, ...updateData } = body
+
+    await updateDoc(userRef, {
+      ...updateData,
+      updatedAt: new Date().toISOString()
+    })
+
+    return NextResponse.json({ message: 'Profile updated successfully' })
   } catch (error) {
     console.error('Error updating profile:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

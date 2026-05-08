@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { hashPassword } from '@/lib/password'
-import connectDB from '@/lib/mongodb'
-import User from '@/models/User'
+import { db } from '@/lib/firebase'
+import { collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore'
 
 const signupSchema = z.object({
   name: z.string().min(1, 'Name is required').max(120),
@@ -61,19 +61,22 @@ export async function POST(request: Request) {
   const avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(`${email}|${gender}|${age}`)}&gender=${gender}&age=${age}`
 
   try {
-    await connectDB()
-    
     // Check if user already exists
-    const existingUser = await User.findOne({ email: email.trim().toLowerCase() })
-    if (existingUser) {
+    const usersRef = collection(db, "users")
+    const q = query(usersRef, where("email", "==", email.trim().toLowerCase()))
+    const querySnapshot = await getDocs(q)
+    
+    if (!querySnapshot.empty) {
       return NextResponse.json(
         { error: 'An account with this email already exists' },
         { status: 409 },
       )
     }
     
-    // Create new user
-    const user = await User.create({
+    // Create new user document
+    const newUserRef = doc(collection(db, "users"))
+    const userData = {
+      id: newUserRef.id,
       email: email.trim().toLowerCase(),
       name: name.trim(),
       password: hashPassword(password),
@@ -88,13 +91,17 @@ export async function POST(request: Request) {
       skills,
       experience,
       education,
-    })
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+    
+    await setDoc(newUserRef, userData)
     
     return NextResponse.json({
-      id: user._id.toString(),
-      email: user.email,
-      name: user.name,
-      role: user.role,
+      id: userData.id,
+      email: userData.email,
+      name: userData.name,
+      role: userData.role,
     })
   } catch (e) {
     console.error(e)
