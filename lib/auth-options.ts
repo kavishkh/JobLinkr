@@ -1,8 +1,8 @@
 import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { db } from '@/lib/firebase'
-import { collection, query, where, getDocs, limit } from 'firebase/firestore'
-import { verifyPassword } from '@/lib/password'
+import { db, auth } from '@/lib/firebase'
+import { doc, getDoc } from 'firebase/firestore/lite'
+import { signInWithEmailAndPassword } from 'firebase/auth'
 
 export const authOptions: NextAuthOptions = {
   secret:
@@ -25,26 +25,35 @@ export const authOptions: NextAuthOptions = {
         if (!email || !password) return null
 
         try {
-          const usersRef = collection(db, "users")
-          const q = query(usersRef, where("email", "==", email.toLowerCase()), limit(1))
-          const querySnapshot = await getDocs(q)
-          
-          if (querySnapshot.empty) return null
-          
-          const userDoc = querySnapshot.docs[0]
-          const user = userDoc.data()
+          // 1. Authenticate with Firebase Auth
+          const userCredential = await signInWithEmailAndPassword(auth, email.toLowerCase(), password);
+          const firebaseUser = userCredential.user;
 
-          if (!verifyPassword(password, user.password)) return null
+          // NOTE: Firestore lookup disabled per user request
+          /*
+          const userDocRef = doc(db, "users", firebaseUser.uid);
+          const userDoc = await getDoc(userDocRef);
+          
+          if (userDoc.exists()) {
+             const userData = userDoc.data();
+             return {
+              id: firebaseUser.uid,
+              email: userData.email,
+              name: userData.name,
+              role: userData.role,
+              image: userData.image,
+            }
+          }
+          */
 
           return {
-            id: userDoc.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-            image: user.image,
+            id: firebaseUser.uid,
+            email: firebaseUser.email || email,
+            name: firebaseUser.displayName || email.split('@')[0],
+            role: 'Seeker', // Default role since we aren't storing it
           }
-        } catch (error) {
-          console.error("Auth error:", error)
+        } catch (error: any) {
+          console.error("Auth error during authorization:", error)
           return null
         }
       },

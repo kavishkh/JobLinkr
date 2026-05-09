@@ -1,12 +1,11 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore/lite";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCH5ymCWHr4mJ2fUoz6m7pDP-YQgkDwvZY",
   authDomain: "joblinkr-dfc2e.firebaseapp.com",
-  databaseURL: "https://joblinkr-dfc2e-default-rtdb.firebaseio.com",
   projectId: "joblinkr-dfc2e",
   storageBucket: "joblinkr-dfc2e.firebasestorage.app",
   messagingSenderId: "66463853234",
@@ -15,12 +14,12 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 // Analytics is only available in the browser
-let analytics;
+let analytics: any;
 if (typeof window !== 'undefined') {
   isSupported().then(yes => {
     if (yes) analytics = getAnalytics(app);

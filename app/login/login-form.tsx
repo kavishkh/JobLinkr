@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { signIn } from 'next-auth/react'
+import { signIn, getSession } from 'next-auth/react'
 import { BriefcaseBusiness, Loader2, ShieldCheck, Sparkles, Users, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -33,7 +33,21 @@ export function LoginForm() {
         setError('Invalid email or password.')
         return
       }
-      router.push(callbackUrl)
+
+      // Get session to check role
+      const session = await getSession()
+      const role = (session?.user as any)?.role
+
+      if (callbackUrl === '/') {
+        if (role === 'Employer') {
+          router.push('/employer')
+        } else {
+          router.push('/jobs')
+        }
+      } else {
+        router.push(callbackUrl)
+      }
+      
       router.refresh()
     } finally {
       setLoading(false)

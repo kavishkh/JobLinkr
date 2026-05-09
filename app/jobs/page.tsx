@@ -19,12 +19,15 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
+import { cn } from '@/lib/utils'
+
 export default function JobsPage() {
   const [filteredJobs, setFilteredJobs] = useState(mockJobs)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null)
   const [selectedType, setSelectedType] = useState<string | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
 
   const applyFilters = (
     search: string = searchTerm,
@@ -108,10 +111,23 @@ export default function JobsPage() {
             <p className="text-muted-foreground">Find your next opportunity</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="flex flex-col lg:grid lg:grid-cols-4 gap-6">
             {/* Sidebar - Filters */}
             <div className="lg:col-span-1">
-              <Card className="p-6 border border-border sticky top-20">
+              {/* Mobile Filter Toggle */}
+              <Button 
+                variant="outline" 
+                className="w-full mb-4 lg:hidden rounded-xl border-border/50 h-12 font-bold"
+                onClick={() => setShowMobileFilters(!showMobileFilters)}
+              >
+                <Search className="size-4 mr-2" />
+                {showMobileFilters ? 'Hide Filters' : 'Show Filters & Search'}
+              </Button>
+
+              <Card className={cn(
+                "p-6 border border-border lg:sticky lg:top-20 transition-all duration-300 rounded-2xl glass",
+                !showMobileFilters && "hidden lg:block"
+              )}>
                 <h3 className="font-semibold text-lg mb-4 text-foreground">Filters</h3>
 
                 {/* Search in filters */}

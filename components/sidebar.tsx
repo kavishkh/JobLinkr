@@ -48,9 +48,14 @@ export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { isMobile, setOpenMobile } = useSidebar()
-  const { status } = useSession()
+  const { data: session, status } = useSession()
+  const role = session?.user?.role
   
-  const sidebarItems = status === 'authenticated' ? authenticatedSidebarItems : publicSidebarItems
+  const sidebarItems = (status === 'authenticated' ? authenticatedSidebarItems : publicSidebarItems)
+    .filter(item => {
+      if (item.href === '/employer' && role?.toLowerCase() === 'seeker') return false
+      return true
+    })
 
   const handleLogout = async () => {
     await signOut({ callbackUrl: '/' })
