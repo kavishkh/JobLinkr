@@ -143,7 +143,7 @@ export default function SignupPage() {
     setLoading(true)
 
     try {
-      const res = await fetch('/api/auth/signup', {
+      const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -163,9 +163,9 @@ export default function SignupPage() {
         }),
       })
 
-      const data = (await res.json()) as { error?: string }
+      const data = (await res.json()) as { error?: string, details?: string, code?: string }
       if (!res.ok) {
-        setError(data.error ?? 'Could not create account.')
+        setError(data.details ? `${data.error}: ${data.details} (${data.code})` : (data.error ?? 'Could not create account.'))
         return
       }
 
@@ -180,7 +180,12 @@ export default function SignupPage() {
         return
       }
 
-      router.push('/profile')
+      // Redirect based on role
+      if (role === 'Employer') {
+        router.push('/employer')
+      } else {
+        router.push('/jobs')
+      }
       router.refresh()
     } catch {
       setError('Something went wrong. Please try again.')

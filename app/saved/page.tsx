@@ -10,8 +10,8 @@ import { mockJobs } from '@/lib/mockData'
 import { BookmarkIcon } from 'lucide-react'
 
 export default function SavedJobsPage() {
-    // Use a subset of mockJobs to simulate saved jobs
-    const [savedJobs, setSavedJobs] = useState(mockJobs.slice(0, 3))
+    // Initialize with an empty array so new users see no saved jobs by default
+    const [savedJobs, setSavedJobs] = useState<any[]>([])
 
     return (
         <main className="min-h-screen bg-background w-full">

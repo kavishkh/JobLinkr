@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { hashPassword } from '@/lib/password'
-import { db } from '@/lib/firebase'
-import { collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore'
+import { collection, doc, setDoc } from 'firebase/firestore/lite'
+import { auth, db } from '@/lib/firebase'
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 
 const signupSchema = z.object({
   name: z.string().min(1, 'Name is required').max(120),
@@ -61,50 +62,62 @@ export async function POST(request: Request) {
   const avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(`${email}|${gender}|${age}`)}&gender=${gender}&age=${age}`
 
   try {
-    // Check if user already exists
-    const usersRef = collection(db, "users")
-    const q = query(usersRef, where("email", "==", email.trim().toLowerCase()))
-    const querySnapshot = await getDocs(q)
-    
-    if (!querySnapshot.empty) {
-      return NextResponse.json(
-        { error: 'An account with this email already exists' },
-        { status: 409 },
-      )
+    // 1. Create user in Firebase Authentication
+    let userCredential;
+    try {
+      userCredential = await createUserWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
+      // Update the user's profile with their name immediately
+      if (userCredential.user) {
+        await updateProfile(userCredential.user, {
+          displayName: name.trim()
+        });
+      }
+    } catch (authError: any) {
+      if (authError.code === 'auth/email-already-in-use') {
+        return NextResponse.json({ error: 'An account with this email already exists' }, { status: 409 });
+      }
+      throw authError;
     }
-    
-    // Create new user document
-    const newUserRef = doc(collection(db, "users"))
-    const userData = {
-      id: newUserRef.id,
-      email: email.trim().toLowerCase(),
+
+    const firebaseUser = userCredential.user;
+
+    // NOTE: Firestore storage is disabled per user request
+    /*
+    const userData = JSON.parse(JSON.stringify({
+      id: firebaseUser.uid,
+      email: firebaseUser.email,
       name: name.trim(),
-      password: hashPassword(password),
-      role: role.toLowerCase(),
+      role: role,
       image: avatar,
       gender,
       age,
-      bio,
-      location,
-      title,
-      socialLinks,
-      skills,
-      experience,
-      education,
+      bio: bio || null,
+      location: location || null,
+      title: title || null,
+      socialLinks: socialLinks || {},
+      skills: skills || [],
+      experience: experience || [],
+      education: education || [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-    }
-    
-    await setDoc(newUserRef, userData)
-    
+    }))
+
+    const userDocRef = doc(db, "users", firebaseUser.uid);
+    await setDoc(userDocRef, userData);
+    */
+
     return NextResponse.json({
-      id: userData.id,
-      email: userData.email,
-      name: userData.name,
-      role: userData.role,
+      id: firebaseUser.uid,
+      email: firebaseUser.email,
+      name: name.trim(),
+      role: role,
     })
-  } catch (e) {
-    console.error(e)
-    return NextResponse.json({ error: 'Could not create account' }, { status: 500 })
+  } catch (e: any) {
+    console.error('Signup error details:', e)
+    return NextResponse.json({ 
+      error: 'Could not create account', 
+      details: e.message || 'Unknown error',
+      code: e.code || 'no-code'
+    }, { status: 500 })
   }
 }

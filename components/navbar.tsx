@@ -29,8 +29,11 @@ export default function Navbar() {
     { label: 'Explore', href: '/' },
     { label: 'Jobs', href: '/jobs' },
     { label: 'AI Matcher', href: '/matcher', requiresAuth: true, icon: <Sparkles className="size-3.5 mr-1" /> },
-    { label: 'Employer Hub', href: '/employer' },
-  ]
+    { label: 'Employer Hub', href: '/employer', requiresEmployer: true },
+  ].filter(item => {
+    if (item.requiresEmployer && role?.toLowerCase() === 'seeker') return false
+    return true
+  })
 
   const handleNavClick = (e: React.MouseEvent, item: typeof navItems[0]) => {
     if (item.requiresAuth && status !== 'authenticated') {

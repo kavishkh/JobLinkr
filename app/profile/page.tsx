@@ -188,38 +188,38 @@ export default function ProfilePage() {
       <div className="w-full px-4 sm:px-8 lg:px-12 py-10">
         <div className="max-w-[1600px] mx-auto">
           <div className="mb-8">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-4">
               <div className="flex items-center gap-3">
-                <h1 className="text-4xl font-bold tracking-tight">Your Identity</h1>
+                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Your Identity</h1>
                 <Badge variant="secondary" className="h-6 gap-1 bg-primary/10 text-primary border-primary/20">
                   <Zap className="w-3 h-3 fill-primary" />
-                  Pro Account
+                  Pro
                 </Badge>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 {isEditing ? (
                   <>
-                    <Button variant="ghost" className="gap-2" onClick={cancelEdit}>
+                    <Button variant="ghost" size="sm" className="gap-2 rounded-xl" onClick={cancelEdit}>
                       <X className="w-4 h-4" /> Cancel
                     </Button>
-                    <Button className="gap-2 shadow-lg shadow-primary/20" onClick={handleSave} disabled={saving}>
+                    <Button size="sm" className="gap-2 shadow-lg shadow-primary/20 rounded-xl px-6" onClick={handleSave} disabled={saving}>
                       {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                      Save Changes
+                      Save
                     </Button>
                   </>
                 ) : (
                   <>
-                    <Button variant="outline" className="gap-2 border-border/60" onClick={handleLogout}>
+                    <Button variant="outline" size="sm" className="gap-2 border-border/60 rounded-xl" onClick={handleLogout}>
                       <LogOut className="w-4 h-4" /> Log Out
                     </Button>
-                    <Button className="gap-2 shadow-lg shadow-primary/20" onClick={() => setIsEditing(true)}>
-                      <Edit2 className="w-4 h-4" /> Edit Profile
+                    <Button size="sm" className="gap-2 shadow-lg shadow-primary/20 rounded-xl px-6" onClick={() => setIsEditing(true)}>
+                      <Edit2 className="w-4 h-4" /> Edit
                     </Button>
                   </>
                 )}
               </div>
             </div>
-            <p className="text-muted-foreground">Manage your personal information and professional presence</p>
+            <p className="text-sm text-muted-foreground font-medium">Manage your professional presence and personal branding</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -232,8 +232,8 @@ export default function ProfilePage() {
                   <div className="absolute inset-0 backdrop-blur-[2px]" />
                 </div>
                 
-                <div className="px-8 pb-8 pt-0 -mt-12 relative flex flex-wrap gap-8 items-center">
-                  <div className="w-32 h-32 md:w-36 md:h-36 rounded-2xl border-4 border-background bg-card flex items-center justify-center overflow-hidden shadow-2xl relative z-10">
+                <div className="px-6 sm:px-8 pb-8 pt-0 -mt-12 sm:-mt-16 relative flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-end">
+                  <div className="w-32 h-32 md:w-40 md:h-40 rounded-3xl border-4 border-background bg-card flex items-center justify-center overflow-hidden shadow-2xl relative z-10 shrink-0">
                     {user.image ? (
                       <img src={user.image} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
@@ -241,29 +241,29 @@ export default function ProfilePage() {
                     )}
                   </div>
                   
-                  <div className="flex-1 min-w-[250px] mb-2 pt-10">
+                  <div className="flex-1 text-center sm:text-left mb-2 pt-2 sm:pt-0">
                     {isEditing ? (
-                      <div className="space-y-3 pt-4">
+                      <div className="space-y-3">
                         <Input 
                           value={editedData.name} 
                           onChange={(e) => setEditedData({...editedData, name: e.target.value})} 
-                          className="text-3xl font-bold bg-transparent border-b border-primary/20 rounded-none h-auto py-1 px-0"
+                          className="text-2xl sm:text-3xl font-bold bg-transparent border-b border-primary/20 rounded-none h-auto py-1 px-0 text-center sm:text-left"
                           placeholder="Your Name"
                         />
                         <Input 
                           value={editedData.title} 
                           onChange={(e) => setEditedData({...editedData, title: e.target.value})} 
-                          className="text-lg text-primary bg-transparent border-none h-auto py-0 px-0 focus-visible:ring-0"
-                          placeholder="Professional Title (e.g. UX Designer)"
+                          className="text-base sm:text-lg text-primary bg-transparent border-none h-auto py-0 px-0 focus-visible:ring-0 text-center sm:text-left"
+                          placeholder="Professional Title"
                         />
                       </div>
                     ) : (
-                      <>
-                        <h2 className="text-4xl font-black tracking-tight mb-1 text-foreground">{user.name}</h2>
-                        <p className="text-xl font-semibold text-primary/90 flex items-center gap-2">
+                      <div className="pt-2 sm:pt-0">
+                        <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-1 text-foreground">{user.name}</h2>
+                        <p className="text-lg sm:text-xl font-semibold text-primary/90">
                           {user.title || "Job Seeker"}
                         </p>
-                      </>
+                      </div>
                     )}
                     
                     <div className="flex flex-wrap gap-x-6 gap-y-2 mt-4 text-sm font-medium text-muted-foreground">
