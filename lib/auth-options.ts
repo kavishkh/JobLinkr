@@ -1,7 +1,6 @@
-import type { NextAuthOptions } from 'next-auth'
+﻿import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { db, auth } from '@/lib/firebase'
-import { doc, getDoc } from 'firebase/firestore/lite'
+import { auth } from './firebase'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 
 export const authOptions: NextAuthOptions = {
@@ -25,35 +24,29 @@ export const authOptions: NextAuthOptions = {
         if (!email || !password) return null
 
         try {
-          // 1. Authenticate with Firebase Auth
-          const userCredential = await signInWithEmailAndPassword(auth, email.toLowerCase(), password);
-          const firebaseUser = userCredential.user;
+          const userCredential = await signInWithEmailAndPassword(auth, email.toLowerCase(), password)
+          const firebaseUser = userCredential.user
 
-          // NOTE: Firestore lookup disabled per user request
-          /*
-          const userDocRef = doc(db, "users", firebaseUser.uid);
-          const userDoc = await getDoc(userDocRef);
-          
-          if (userDoc.exists()) {
-             const userData = userDoc.data();
-             return {
-              id: firebaseUser.uid,
-              email: userData.email,
-              name: userData.name,
-              role: userData.role,
-              image: userData.image,
+          let displayName = firebaseUser.displayName || email.split('@')[0]
+          let role: 'Seeker' | 'Employer' = 'Seeker'
+
+          if (displayName.includes('|')) {
+            const parts = displayName.split('|')
+            const possibleRole = parts[parts.length - 1]
+            if (possibleRole === 'Seeker' || possibleRole === 'Employer') {
+              role = possibleRole
+              displayName = parts.slice(0, -1).join('|')
             }
           }
-          */
 
           return {
             id: firebaseUser.uid,
             email: firebaseUser.email || email,
-            name: firebaseUser.displayName || email.split('@')[0],
-            role: 'Seeker', // Default role since we aren't storing it
+            name: displayName,
+            role,
           }
         } catch (error: any) {
-          console.error("Auth error during authorization:", error)
+          console.error('Auth error during authorization:', error)
           return null
         }
       },
@@ -70,8 +63,9 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string
-        session.user.role = token.role as 'Seeker' | 'Employer'
+        const user = session.user as { id?: string; role?: 'Seeker' | 'Employer' }
+        user.id = token.id as string
+        user.role = token.role as 'Seeker' | 'Employer'
       }
       return session
     },
