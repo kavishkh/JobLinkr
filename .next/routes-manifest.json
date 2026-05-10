@@ -15,12 +15,21 @@
     }
   ],
   "headers": [],
+  "onMatchHeaders": [],
   "rewrites": {
     "beforeFiles": [],
     "afterFiles": [],
     "fallback": []
   },
   "dynamicRoutes": [
+    {
+      "page": "/api/auth/[...nextauth]",
+      "regex": "^/api/auth/(.+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPnextauth": "nxtPnextauth"
+      },
+      "namedRegex": "^/api/auth/(?<nxtPnextauth>.+?)(?:/)?$"
+    },
     {
       "page": "/jobs/[id]",
       "regex": "^/jobs/([^/]+?)(?:/)?$",
@@ -68,6 +77,18 @@
       "namedRegex": "^/api/jobs/search(?:/)?$"
     },
     {
+      "page": "/api/signup",
+      "regex": "^/api/signup(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/signup(?:/)?$"
+    },
+    {
+      "page": "/api/user/profile",
+      "regex": "^/api/user/profile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/user/profile(?:/)?$"
+    },
+    {
       "page": "/employer",
       "regex": "^/employer(?:/)?$",
       "routeKeys": {},
@@ -78,6 +99,12 @@
       "regex": "^/jobs(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/jobs(?:/)?$"
+    },
+    {
+      "page": "/login",
+      "regex": "^/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/login(?:/)?$"
     },
     {
       "page": "/matcher",
@@ -102,6 +129,12 @@
       "regex": "^/settings(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/settings(?:/)?$"
+    },
+    {
+      "page": "/signup",
+      "regex": "^/signup(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/signup(?:/)?$"
     }
   ],
   "dataRoutes": [],

@@ -69,7 +69,7 @@ export async function POST(request: Request) {
       // Update the user's profile with their name immediately
       if (userCredential.user) {
         await updateProfile(userCredential.user, {
-          displayName: name.trim()
+          displayName: `${name.trim()}|${role}`
         });
       }
     } catch (authError: any) {

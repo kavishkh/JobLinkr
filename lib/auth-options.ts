@@ -46,11 +46,23 @@ export const authOptions: NextAuthOptions = {
           }
           */
 
+          let displayName = firebaseUser.displayName || email.split('@')[0];
+          let role = 'Seeker';
+          
+          if (displayName.includes('|')) {
+            const parts = displayName.split('|');
+            const possibleRole = parts[parts.length - 1];
+            if (possibleRole === 'Seeker' || possibleRole === 'Employer') {
+              role = possibleRole;
+              displayName = parts.slice(0, -1).join('|');
+            }
+          }
+
           return {
             id: firebaseUser.uid,
             email: firebaseUser.email || email,
-            name: firebaseUser.displayName || email.split('@')[0],
-            role: 'Seeker', // Default role since we aren't storing it
+            name: displayName,
+            role: role as 'Seeker' | 'Employer',
           }
         } catch (error: any) {
           console.error("Auth error during authorization:", error)
