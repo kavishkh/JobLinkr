@@ -15,16 +15,61 @@ import {
   Calendar,
   Users,
   CheckCircle,
+  Bot,
+  Loader2,
 } from 'lucide-react'
 import Navbar from '@/components/navbar'
 import { Sidebar } from '@/components/sidebar'
+import { toast } from 'sonner'
+import { useSavedJobs } from '@/hooks/use-saved-jobs'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export default function JobDetail({ params }: { params: { id: string } }) {
   const job = mockJobs.find((j) => j.id === params.id)
-  const [isSaved, setIsSaved] = useState(false)
+  const { isSaved, toggleSaveJob } = useSavedJobs()
+  const saved = job ? isSaved(job.id) : false
   const [isApplied, setIsApplied] = useState(
     mockApplications.some((app) => app.jobId === params.id)
   )
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [useAiResume, setUseAiResume] = useState(true)
+  const [aiRoleType, setAiRoleType] = useState('fullstack')
+  const [isApplying, setIsApplying] = useState(false)
+
+  const handleApply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (useAiResume) {
+      setIsApplying(true);
+      toast.info('Analyzing job requirements...');
+      await new Promise(r => setTimeout(r, 300));
+      toast.success('AI Resume intelligently tailored for this role!');
+      await new Promise(r => setTimeout(r, 200));
+      setIsApplying(false);
+    } else {
+      toast.success('Application submitted successfully!');
+    }
+    setIsApplied(true);
+    setIsDialogOpen(false);
+  }
 
   if (!job) {
     return (
@@ -64,11 +109,11 @@ export default function JobDetail({ params }: { params: { id: string } }) {
             </Link>
             <div className="flex gap-2">
               <Button
-                variant={isSaved ? 'default' : 'outline'}
+                variant={saved ? 'default' : 'outline'}
                 size="icon"
-                onClick={() => setIsSaved(!isSaved)}
+                onClick={() => toggleSaveJob(job.id)}
               >
-                <Heart className={`w-5 h-5 ${isSaved ? 'fill-current' : ''}`} />
+                <Heart className={`w-5 h-5 ${saved ? 'fill-current' : ''}`} />
               </Button>
               <Button variant="outline" size="icon">
                 <Share2 className="w-5 h-5" />
@@ -99,7 +144,7 @@ export default function JobDetail({ params }: { params: { id: string } }) {
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <DollarSign className="w-4 h-4" />
-                        {job.salary ? `${job.salary.currency}${job.salary.min.toLocaleString()} - ${job.salary.max.toLocaleString()}` : 'Competitive'}
+                        {job.salary ? `${job.salary.currency}${job.salary.min.toLocaleString('en-US')} - ${job.salary.max.toLocaleString('en-US')}` : 'Competitive'}
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Calendar className="w-4 h-4" />
@@ -109,21 +154,116 @@ export default function JobDetail({ params }: { params: { id: string } }) {
                   </div>
                 </div>
 
-                <Button
-                  size="lg"
-                  className="w-full"
-                  onClick={() => setIsApplied(!isApplied)}
-                  variant={isApplied ? 'outline' : 'default'}
-                >
-                  {isApplied ? (
-                    <>
-                      <CheckCircle className="w-5 h-5 mr-2" />
-                      Application Sent
-                    </>
-                  ) : (
-                    'Apply Now'
-                  )}
-                </Button>
+                {isApplied ? (
+                  <Button
+                    size="lg"
+                    className="w-full"
+                    onClick={() => setIsApplied(false)}
+                    variant="outline"
+                  >
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    Application Sent
+                  </Button>
+                ) : (
+                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button size="lg" className="w-full">
+                        Apply Now
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[500px]">
+                      <form onSubmit={handleApply}>
+                        <DialogHeader>
+                          <DialogTitle>Apply for {job.title}</DialogTitle>
+                          <DialogDescription>
+                            Submit your application to {job.company}. Fill out the details below.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="grid gap-2">
+                            <Label htmlFor="name">Full Name</Label>
+                            <Input id="name" defaultValue="John Doe" required />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input id="email" type="email" defaultValue="john@example.com" required />
+                          </div>
+                          
+                          <div className="flex items-start space-x-3 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                            <Checkbox 
+                              id="ai-resume" 
+                              checked={useAiResume} 
+                              onCheckedChange={(checked) => setUseAiResume(checked as boolean)}
+                            />
+                            <div className="grid gap-1.5 leading-none">
+                              <Label htmlFor="ai-resume" className="flex items-center gap-2 font-semibold">
+                                <Bot className="w-4 h-4 text-primary" />
+                                Use My AI Resume
+                              </Label>
+                              <p className="text-sm text-muted-foreground">
+                                Automatically attach your intelligently optimized AI Resume for this specific role.
+                              </p>
+                            </div>
+                          </div>
+
+                          {useAiResume && (
+                            <div className="grid gap-2 bg-primary/5 p-4 rounded-lg border border-primary/10">
+                              <Label htmlFor="role-type">Target Role Optimization</Label>
+                              <Select value={aiRoleType} onValueChange={setAiRoleType}>
+                                <SelectTrigger id="role-type" className="bg-background">
+                                  <SelectValue placeholder="Select target role..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="frontend">Frontend Developer</SelectItem>
+                                  <SelectItem value="backend">Backend Developer</SelectItem>
+                                  <SelectItem value="fullstack">Full-Stack Engineer</SelectItem>
+                                  <SelectItem value="devops">DevOps / Platform</SelectItem>
+                                  <SelectItem value="designer">UI/UX Designer</SelectItem>
+                                  <SelectItem value="data">Data Scientist</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <p className="text-[11px] text-muted-foreground mt-1">
+                                Your resume will be tailored to highlight {aiRoleType} skills to match the job.
+                              </p>
+                            </div>
+                          )}
+
+                          {!useAiResume && (
+                            <div className="grid gap-2">
+                              <Label htmlFor="resume">Upload Resume</Label>
+                              <Input id="resume" type="file" />
+                            </div>
+                          )}
+
+                          <div className="grid gap-2">
+                            <Label htmlFor="cover-letter">Cover Letter (Optional)</Label>
+                            <Textarea 
+                              id="cover-letter" 
+                              placeholder="Why are you a great fit for this role?"
+                              className="h-24"
+                              defaultValue={useAiResume ? `Dear Hiring Manager,\n\nI am very interested in the ${job.title} position at ${job.company}. I believe my skills and experience align perfectly with your requirements.\n\nThank you for your consideration.` : ""}
+                            />
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isApplying}>
+                            Cancel
+                          </Button>
+                          <Button type="submit" disabled={isApplying}>
+                            {isApplying ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Optimizing AI Resume...
+                              </>
+                            ) : (
+                              "Submit Application"
+                            )}
+                          </Button>
+                        </DialogFooter>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                )}
               </Card>
 
               {/* Job Description */}

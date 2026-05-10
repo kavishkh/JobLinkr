@@ -74,7 +74,8 @@ self.__SERVER_FILES_MANIFEST={
       "qualities": [
         75
       ],
-      "unoptimized": false
+      "unoptimized": false,
+      "customCacheHandler": false
     },
     "devIndicators": {
       "position": "bottom-left"
@@ -95,7 +96,10 @@ self.__SERVER_FILES_MANIFEST={
     "httpAgentOptions": {
       "keepAlive": true
     },
-    "logging": {},
+    "logging": {
+      "serverFunctions": true,
+      "browserToTerminal": "warn"
+    },
     "compiler": {},
     "expireTime": 31536000,
     "staticPageGenerationTimeout": 60,
@@ -107,7 +111,7 @@ self.__SERVER_FILES_MANIFEST={
         "transform": "lodash/{{member}}"
       }
     },
-    "outputFileTracingRoot": "C:\\Users\\kavis\\Desktop\\Joblinkr\\New folder\\JobLinkr",
+    "outputFileTracingRoot": "C:\\Users\\kavis\\Desktop\\project\\Joblinker\\Project\\JobLinkr\\by_teamates\\JobLinkr",
     "cacheComponents": false,
     "cacheLife": {
       "default": {
@@ -148,6 +152,7 @@ self.__SERVER_FILES_MANIFEST={
     },
     "cacheHandlers": {},
     "experimental": {
+      "appNewScrollHandler": false,
       "useSkewCookie": false,
       "cssChunking": true,
       "multiZoneDraftMode": false,
@@ -156,7 +161,11 @@ self.__SERVER_FILES_MANIFEST={
       "serverMinification": true,
       "linkNoTouchStart": false,
       "caseSensitiveRoutes": false,
+      "cachedNavigations": false,
+      "partialFallbacks": false,
       "dynamicOnHover": false,
+      "varyParams": false,
+      "prefetchInlining": false,
       "preloadEntriesOnStart": true,
       "clientRouterFilter": true,
       "clientRouterFilterRedirects": false,
@@ -192,6 +201,7 @@ self.__SERVER_FILES_MANIFEST={
       "authInterrupts": false,
       "webpackMemoryOptimizations": false,
       "optimizeServerReact": true,
+      "strictRouteTypes": false,
       "viewTransition": false,
       "removeUncaughtErrorAndRejectionListeners": false,
       "validateRSCRequestHeaders": false,
@@ -199,24 +209,24 @@ self.__SERVER_FILES_MANIFEST={
         "dynamic": 0,
         "static": 300
       },
-      "reactDebugChannel": false,
+      "reactDebugChannel": true,
       "serverComponentsHmrCache": true,
       "staticGenerationMaxConcurrency": 8,
       "staticGenerationMinPagesPerWorker": 25,
       "transitionIndicator": false,
+      "gestureTransition": false,
       "inlineCss": false,
       "useCache": false,
       "globalNotFound": false,
-      "browserDebugInfoInTerminal": false,
+      "browserDebugInfoInTerminal": "warn",
       "lockDistDir": true,
-      "isolatedDevBuild": true,
       "proxyClientMaxBodySize": 10485760,
       "hideLogsAfterAbort": false,
       "mcpServer": true,
       "turbopackFileSystemCacheForDev": true,
       "turbopackFileSystemCacheForBuild": false,
-      "turbopackInferModuleSideEffects": false,
-      "reactCompiler": true,
+      "turbopackInferModuleSideEffects": true,
+      "turbopackPluginRuntimeStrategy": "childProcesses",
       "optimizePackageImports": [
         "lucide-react",
         "@radix-ui/react-avatar",
@@ -305,11 +315,11 @@ self.__SERVER_FILES_MANIFEST={
     "configFileName": "next.config.mjs",
     "reactCompiler": true,
     "turbopack": {
-      "root": "C:\\Users\\kavis\\Desktop\\Joblinkr\\New folder\\JobLinkr"
+      "root": "C:\\Users\\kavis\\Desktop\\project\\Joblinker\\Project\\JobLinkr\\by_teamates\\JobLinkr"
     },
     "distDirRoot": ".next"
   },
-  "appDir": "C:\\Users\\kavis\\Desktop\\Joblinkr\\New folder\\JobLinkr",
+  "appDir": "C:\\Users\\kavis\\Desktop\\project\\Joblinker\\Project\\JobLinkr\\by_teamates\\JobLinkr",
   "relativeAppDir": "",
   "files": [
     ".next\\routes-manifest.json",
@@ -323,6 +333,7 @@ self.__SERVER_FILES_MANIFEST={
     ".next\\app-path-routes-manifest.json",
     ".next\\server\\server-reference-manifest.js",
     ".next\\server\\server-reference-manifest.json",
+    ".next\\server\\prefetch-hints.json",
     ".next\\BUILD_ID",
     ".next\\server\\next-font-manifest.js",
     ".next\\server\\next-font-manifest.json",

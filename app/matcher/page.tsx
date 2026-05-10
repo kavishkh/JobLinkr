@@ -34,6 +34,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
+import { useSavedJobs } from '@/hooks/use-saved-jobs'
 
 interface MarketJob {
   slug: string
@@ -65,7 +66,7 @@ export default function MatcherPage() {
   const { data: session, status: authStatus } = useSession()
   const router = useRouter()
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [liked, setLiked] = useState<string[]>([])
+  const { savedJobIds, saveJob } = useSavedJobs()
   const [passed, setPassed] = useState<string[]>([])
   const [step, setStep] = useState<'onboarding' | 'matching'>('onboarding')
   const [status, setStatus] = useState<string>('')
@@ -130,13 +131,12 @@ export default function MatcherPage() {
   const currentMatch = matches[currentIndex]
   const currentJob = currentMatch?.job
   
-  const isLiked = currentJob ? liked.includes(currentJob.id) : false
+  const isLiked = currentJob ? savedJobIds.includes(currentJob.id) : false
   const isPassed = currentJob ? passed.includes(currentJob.id) : false
 
   const handleLike = () => {
     if (currentJob && !isLiked) {
-      setLiked([...liked, currentJob.id])
-      toast.success('Job saved to your matches!')
+      saveJob(currentJob.id)
     }
     handleNext()
   }
@@ -203,10 +203,10 @@ export default function MatcherPage() {
         seenSlugs.add(job.slug);
 
         try {
-          // 4s delay to strictly respect 15RPM (1 req / 4s) free tier limit
+          // 500ms delay to feel fast but show UI update
           if (finalMatches.length > 0) {
             setStatus(`Analyzing match ${finalMatches.length + 1}...`);
-            await new Promise(resolve => setTimeout(resolve, 4000));
+            await new Promise(resolve => setTimeout(resolve, 500));
           }
 
           const scoreResp = await fetch('/api/jobs/score', {
@@ -368,7 +368,7 @@ export default function MatcherPage() {
               <p className="text-xs text-muted-foreground mb-6">Reviewed all items for "{targetRole}"</p>
               <div className="flex gap-3">
                 <Button variant="outline" size="sm" className="flex-1" onClick={handleEditPreferences}>Refine</Button>
-                <Button size="sm" className="flex-1" onClick={() => { setStep('onboarding'); setLiked([]); setMatches([]); }}>Reset</Button>
+                <Button size="sm" className="flex-1" onClick={() => { setStep('onboarding'); setMatches([]); }}>Reset</Button>
               </div>
             </Card>
           </div>
@@ -400,7 +400,7 @@ export default function MatcherPage() {
               <div className="flex items-center gap-2">
                 <div className="px-3 py-1.5 bg-accent/5 rounded-xl border border-accent/10 flex items-center gap-2">
                   <Heart className="w-4 h-4 text-accent fill-accent" />
-                  <span className="text-sm font-bold text-accent">{liked.length}</span>
+                  <span className="text-sm font-bold text-accent">{savedJobIds.length}</span>
                 </div>
                 <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl" onClick={handleEditPreferences}>
                   <Settings2 className="w-5 h-5" />
