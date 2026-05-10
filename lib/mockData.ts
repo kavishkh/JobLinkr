@@ -165,6 +165,46 @@ export const mockPosts: Post[] = [
     comments: 28,
     shares: 22,
     liked: false
+  },
+  {
+    id: '7',
+    author: mockUsers[3],
+    content: 'Just had an amazing coffee chat with a junior designer today. Remember, we all started somewhere! Mentorship is one of the most fulfilling parts of my job. #Mentorship #Design #CareerGrowth',
+    timestamp: new Date(Date.now() - 36 * 60 * 60 * 1000),
+    likes: 420,
+    comments: 55,
+    shares: 19,
+    liked: false
+  },
+  {
+    id: '8',
+    author: mockUsers[4],
+    content: 'Is anyone else exploring Rust for backend services? The performance benchmarks compared to Node.js are mind-blowing, but the learning curve is definitely steep. Let me know if you have good resources for beginners!',
+    timestamp: new Date(Date.now() - 48 * 60 * 60 * 1000),
+    likes: 310,
+    comments: 89,
+    shares: 41,
+    liked: false
+  },
+  {
+    id: '9',
+    author: mockUsers[1],
+    content: 'Very proud of our engineering team at TechStart Inc. We just successfully migrated our core database with zero downtime! 🎉 Hard work pays off.',
+    timestamp: new Date(Date.now() - 52 * 60 * 60 * 1000),
+    likes: 890,
+    comments: 112,
+    shares: 64,
+    liked: false
+  },
+  {
+    id: '10',
+    author: mockUsers[2],
+    content: 'I see a lot of portfolios missing proper case studies. Don\'t just show the final UI; tell the story of the problem, your process, and the business impact! That\'s what hiring managers want to see.',
+    timestamp: new Date(Date.now() - 60 * 60 * 60 * 1000),
+    likes: 560,
+    comments: 42,
+    shares: 115,
+    liked: false
   }
 ]
 
@@ -252,6 +292,62 @@ export const mockJobs: Job[] = [
     skills: ['Kubernetes', 'Docker', 'AWS', 'CI/CD', 'Linux'],
     posted: new Date(Date.now() - 10 * 60 * 60 * 1000),
     applicants: 15
+  },
+  {
+    id: 'job-7',
+    title: 'Backend Developer (Go)',
+    company: 'Fintech Solutions',
+    companyLogo: 'https://api.dicebear.com/7.x/initials/svg?seed=FS',
+    location: 'New York, NY',
+    level: 'Mid',
+    type: 'Full-time',
+    salary: { min: 130000, max: 175000, currency: 'USD' },
+    description: 'Build high-throughput, low-latency microservices for our payment processing pipeline using Go and gRPC.',
+    skills: ['Go', 'Microservices', 'gRPC', 'PostgreSQL', 'Kafka'],
+    posted: new Date(Date.now() - 14 * 60 * 60 * 1000),
+    applicants: 42
+  },
+  {
+    id: 'job-8',
+    title: 'Machine Learning Researcher',
+    company: 'DeepMinded AI',
+    companyLogo: 'https://api.dicebear.com/7.x/initials/svg?seed=DM',
+    location: 'Remote',
+    level: 'Senior',
+    type: 'Full-time',
+    salary: { min: 200000, max: 280000, currency: 'USD' },
+    description: 'Push the boundaries of foundational models. We are looking for researchers with a strong publication record in top AI conferences.',
+    skills: ['PyTorch', 'Deep Learning', 'NLP', 'Research', 'Python'],
+    posted: new Date(Date.now() - 18 * 60 * 60 * 1000),
+    applicants: 8
+  },
+  {
+    id: 'job-9',
+    title: 'React Native Developer',
+    company: 'MobileFirst',
+    companyLogo: 'https://api.dicebear.com/7.x/initials/svg?seed=MF',
+    location: 'London, UK',
+    level: 'Entry',
+    type: 'Contract',
+    salary: { min: 45, max: 70, currency: 'GBP/hour' },
+    description: 'Help us migrate our iOS and Android apps to a unified React Native codebase. Great opportunity to learn from senior engineers.',
+    skills: ['React Native', 'JavaScript', 'Mobile UI', 'Redux'],
+    posted: new Date(Date.now() - 20 * 60 * 60 * 1000),
+    applicants: 65
+  },
+  {
+    id: 'job-10',
+    title: 'Staff Security Engineer',
+    company: 'SecureNet',
+    companyLogo: 'https://api.dicebear.com/7.x/initials/svg?seed=SN',
+    location: 'San Francisco, CA',
+    level: 'Senior',
+    type: 'Full-time',
+    salary: { min: 210000, max: 270000, currency: 'USD' },
+    description: 'Lead our application security program. You will conduct architecture reviews, penetration testing, and build secure-by-default libraries.',
+    skills: ['AppSec', 'Penetration Testing', 'Cryptography', 'Python', 'Go'],
+    posted: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    applicants: 11
   }
 ]
 

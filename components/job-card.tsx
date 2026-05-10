@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
@@ -7,7 +7,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Briefcase, Users, DollarSign, Clock, ArrowUpRight, CheckCircle, Loader2 } from 'lucide-react'
+import { MapPin, Users, DollarSign, ArrowUpRight, CheckCircle, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
@@ -21,7 +21,6 @@ export function JobCard({ job }: JobCardProps) {
   const [applicationStatus, setApplicationStatus] = useState<'none' | 'applied' | 'applying' | 'error'>('none')
   const [isLoading, setIsLoading] = useState(false)
 
-  // Check if user has already applied to this job
   useEffect(() => {
     const checkApplicationStatus = async () => {
       if (!session?.user?.id) return
@@ -84,6 +83,7 @@ export function JobCard({ job }: JobCardProps) {
       setIsLoading(false)
     }
   }
+
   const getLevelColor = (level: string) => {
     switch (level) {
       case 'Entry':
@@ -210,4 +210,3 @@ export function JobCard({ job }: JobCardProps) {
     </Link>
   )
 }
-

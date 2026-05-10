@@ -1,17 +1,41 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Navbar from '@/components/navbar'
 import { Sidebar } from '@/components/sidebar'
 import { JobCard } from '@/components/job-card'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { mockJobs } from '@/lib/mockData'
-import { BookmarkIcon } from 'lucide-react'
+import { BookmarkIcon, Loader2 } from 'lucide-react'
+import { useSavedJobs } from '@/hooks/use-saved-jobs'
 
 export default function SavedJobsPage() {
-    // Initialize with an empty array so new users see no saved jobs by default
+    const { savedJobIds } = useSavedJobs()
     const [savedJobs, setSavedJobs] = useState<any[]>([])
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    useEffect(() => {
+        if (mounted) {
+            const jobs = mockJobs.filter(job => savedJobIds.includes(job.id))
+            setSavedJobs(jobs)
+        }
+    }, [savedJobIds, mounted])
+
+    if (!mounted) {
+        return (
+            <main className="min-h-screen bg-background w-full">
+                <Navbar />
+                <div className="flex items-center justify-center min-h-[60vh]">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            </main>
+        )
+    }
 
     return (
         <main className="min-h-screen bg-background w-full">

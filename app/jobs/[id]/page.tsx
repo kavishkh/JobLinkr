@@ -1,9 +1,8 @@
 import { mockJobs } from '@/lib/mockData'
 import JobDetailClient from './JobDetailClient'
 
-export default async function JobDetail({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const job = mockJobs.find((j) => j.id === id)
+export default function JobDetail({ params }: { params: { id: string } }) {
+  const job = mockJobs.find((j) => j.id === params.id)
 
   if (!job) {
     return (
@@ -15,5 +14,4 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
     )
   }
 
-  return <JobDetailClient job={job} jobId={id} />
-}
+  return <JobDetailClient job={job} jobId={params.id} />
