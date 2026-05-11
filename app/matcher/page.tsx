@@ -78,6 +78,9 @@ export default function MatcherPage() {
   const [matches, setMatches] = useState<MatchResult[]>([])
   const [aiAnalysis, setAiAnalysis] = useState<any>(null)
 
+  const currentMatch = matches[currentIndex]
+  const currentJob = currentMatch?.job
+
   // Redirect to login if not authenticated
   useEffect(() => {
     if (authStatus === 'unauthenticated') {
@@ -127,9 +130,6 @@ export default function MatcherPage() {
       </main>
     )
   }
-
-  const currentMatch = matches[currentIndex]
-  const currentJob = currentMatch?.job
   
   const isLiked = currentJob ? savedJobIds.includes(currentJob.id) : false
   const isPassed = currentJob ? passed.includes(currentJob.id) : false
@@ -268,6 +268,28 @@ export default function MatcherPage() {
 
   const handleEditPreferences = () => {
     setStep('onboarding')
+  }
+
+  const handleOpenApplicationPage = () => {
+    if (!currentJob) return
+
+    const params = new URLSearchParams({
+      jobId: currentJob.id,
+      title: currentJob.title,
+      company: currentJob.company,
+      location: currentJob.location,
+      description: currentJob.description,
+    })
+
+    router.push(`/matcher/apply?${params.toString()}`)
+  }
+
+  const handleApplySubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    toast.success('Application details saved.')
+    setIsApplyDialogOpen(false)
+    setApplicationResume(null)
   }
 
   if (step === 'onboarding') {
@@ -478,14 +500,12 @@ export default function MatcherPage() {
             {/* Action Group - Prioritize Apply */}
             <div className="flex flex-col gap-3 max-w-md mx-auto">
               <Button
-                asChild
                 size="lg"
                 className="w-full rounded-2xl h-14 font-bold text-base bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 transition-all gap-2"
+                onClick={handleOpenApplicationPage}
               >
-                <a href={currentJob.url} target="_blank" rel="noopener noreferrer">
-                  Apply Now on Company Site
-                  <ExternalLink className="w-5 h-5" />
-                </a>
+                Apply Now
+                <ExternalLink className="w-5 h-5" />
               </Button>
               
               <div className="flex gap-3">
