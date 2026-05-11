@@ -15,3 +15,4 @@ export default function JobDetail({ params }: { params: { id: string } }) {
   }
 
   return <JobDetailClient job={job} jobId={params.id} />
+}

@@ -1,5 +1,9 @@
 {
   "app": {
+    "[project]/app/jobs/[id]/page": [
+      "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
+      "static/media/1b99372b3eaef0c8-s.p.0gx2haw2tmll8.woff2"
+    ],
     "[project]/app/jobs/page": [
       "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
       "static/media/1b99372b3eaef0c8-s.p.0gx2haw2tmll8.woff2"
@@ -20,7 +24,7 @@
       "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
       "static/media/1b99372b3eaef0c8-s.p.0gx2haw2tmll8.woff2"
     ],
-    "[project]/app/profile/page": [
+    "[project]/app/saved/page": [
       "static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2",
       "static/media/1b99372b3eaef0c8-s.p.0gx2haw2tmll8.woff2"
     ],

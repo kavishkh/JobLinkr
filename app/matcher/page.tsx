@@ -5,7 +5,6 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import {
   Sparkles,
   Heart,
@@ -35,6 +34,7 @@ import {
 } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { useSavedJobs } from '@/hooks/use-saved-jobs'
+import { mockJobs } from '@/lib/mockData'
 
 interface MarketJob {
   slug: string
@@ -61,6 +61,8 @@ interface MatchResult {
   reason: string
   hireabilityTip?: string
 }
+
+const TARGET_ROLE_OPTIONS = Array.from(new Set(mockJobs.map((job) => job.title)))
 
 export default function MatcherPage() {
   const { data: session, status: authStatus } = useSession()
@@ -136,7 +138,15 @@ export default function MatcherPage() {
 
   const handleLike = () => {
     if (currentJob && !isLiked) {
-      saveJob(currentJob.id)
+      saveJob(currentJob.id, {
+        title: currentJob.title,
+        company: currentJob.company,
+        location: currentJob.location,
+        description: currentJob.description,
+        url: currentJob.url,
+        skills: currentJob.skills,
+        source: 'market',
+      })
     }
     handleNext()
   }
@@ -284,14 +294,6 @@ export default function MatcherPage() {
     router.push(`/matcher/apply?${params.toString()}`)
   }
 
-  const handleApplySubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
-    toast.success('Application details saved.')
-    setIsApplyDialogOpen(false)
-    setApplicationResume(null)
-  }
-
   if (step === 'onboarding') {
     return (
       <main className="min-h-screen bg-background text-foreground w-full">
@@ -337,12 +339,21 @@ export default function MatcherPage() {
                   <div className="space-y-4">
                     <div>
                       <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">Target Role</label>
-                      <Input 
-                        placeholder="e.g. Frontend dev" 
-                        value={targetRole}
-                        onChange={(e) => setTargetRole(e.target.value)}
-                        className="h-9 text-sm bg-muted/50"
-                      />
+                      <Select value={targetRole} onValueChange={setTargetRole}>
+                        <SelectTrigger className="h-9 text-sm bg-muted/50">
+                          <SelectValue placeholder="Select a role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TARGET_ROLE_OPTIONS.map((role) => (
+                            <SelectItem key={role} value={role}>
+                              {role}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="mt-1 text-[10px] text-muted-foreground">
+                        Pick a role to tailor the job recommendations.
+                      </p>
                     </div>
 
                     <div>

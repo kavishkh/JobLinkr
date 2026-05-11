@@ -5,12 +5,12 @@
   "/api/jobs/score/route": "app/api/jobs/score/route.js",
   "/api/jobs/search/route": "app/api/jobs/search/route.js",
   "/api/signup/route": "app/api/signup/route.js",
-  "/api/user/profile/route": "app/api/user/profile/route.js",
+  "/jobs/[id]/page": "app/jobs/[id]/page.js",
   "/jobs/page": "app/jobs/page.js",
   "/login/page": "app/login/page.js",
   "/matcher/apply/page": "app/matcher/apply/page.js",
   "/matcher/page": "app/matcher/page.js",
   "/page": "app/page.js",
-  "/profile/page": "app/profile/page.js",
+  "/saved/page": "app/saved/page.js",
   "/signup/page": "app/signup/page.js"
 }
