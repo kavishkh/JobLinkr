@@ -115,12 +115,32 @@ export default function EmployerDashboard() {
   const [loading, setLoading] = useState(true)
   const [userProfile, setUserProfile] = useState<any>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [applications, setApplications] = useState<any[]>([])
+  const [applicationsLoading, setApplicationsLoading] = useState(false)
 
   // Company Info Form State
   const [companyName, setCompanyName] = useState('')
   const [industry, setIndustry] = useState('')
   const [companySize, setCompanySize] = useState('')
   const [website, setWebsite] = useState('')
+
+  const fetchApplications = async () => {
+    setApplicationsLoading(true)
+    try {
+      const res = await fetch('/api/employer/applications')
+      const data = await res.json()
+      if (res.ok) {
+        setApplications(data.applications)
+      } else {
+        toast.error('Failed to load applications')
+      }
+    } catch (error) {
+      console.error('Error fetching applications:', error)
+      toast.error('Failed to load applications')
+    } finally {
+      setApplicationsLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -129,6 +149,12 @@ export default function EmployerDashboard() {
       setLoading(false)
     }
   }, [status])
+
+  useEffect(() => {
+    if (selectedTab === 'applications' && session?.user?.role === 'Employer') {
+      fetchApplications()
+    }
+  }, [selectedTab, session])
 
   const fetchProfile = async () => {
     try {
@@ -434,53 +460,56 @@ export default function EmployerDashboard() {
                   {/* Applications List */}
                   {selectedTab === 'applications' && (
                     <div className="space-y-4">
-                      {mockApplications.map((app) => (
-                        <Card key={app.id} className="p-6">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1">
-                              <h3 className="text-lg font-semibold mb-1">
-                                {app.name}
-                              </h3>
-                              <p className="text-sm text-muted-foreground mb-3">
-                                Applied for: {app.position}
-                              </p>
-                              <div className="flex items-center gap-4 text-sm">
-                                <span className="text-muted-foreground">
-                                  {app.date}
-                                </span>
-                                <span className="text-yellow-500">
-                                  ★ {app.rating}
-                                </span>
+                      {applicationsLoading ? (
+                        <div className="flex items-center justify-center py-12">
+                          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                          <span className="ml-2 text-muted-foreground">Loading applications...</span>
+                        </div>
+                      ) : applications.length > 0 ? (
+                        applications.map((app) => (
+                          <Card key={app.id} className="p-6">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1">
+                                <h3 className="text-lg font-semibold mb-1">
+                                  {app.applicantName}
+                                </h3>
+                                <p className="text-sm text-muted-foreground mb-3">
+                                  Applied for: {app.position} at {app.company}
+                                </p>
+                                <div className="flex items-center gap-4 text-sm">
+                                  <span className="text-muted-foreground">
+                                    {new Date(app.appliedAt).toLocaleDateString()}
+                                  </span>
+                                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                    app.status === 'Applied' ? 'bg-blue-100 text-blue-800' :
+                                    app.status === 'Under Review' ? 'bg-yellow-100 text-yellow-800' :
+                                    app.status === 'Accepted' ? 'bg-green-100 text-green-800' :
+                                    'bg-red-100 text-red-800'
+                                  }`}>
+                                    {app.status}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button variant="outline" size="sm">
+                                  View Profile
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  Contact
+                                </Button>
                               </div>
                             </div>
-                            <div className="text-right">
-                              <div className="mb-3">
-                                {app.status === 'reviewing' && (
-                                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                                    <Clock className="w-3 h-3" />
-                                    Reviewing
-                                  </span>
-                                )}
-                                {app.status === 'interviewed' && (
-                                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-accent/20 text-accent rounded-full text-xs font-medium">
-                                    <CheckCircle className="w-3 h-3" />
-                                    Interviewed
-                                  </span>
-                                )}
-                                {app.status === 'rejected' && (
-                                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
-                                    <XCircle className="w-3 h-3" />
-                                    Rejected
-                                  </span>
-                                )}
-                              </div>
-                              <Button size="sm" variant="outline">
-                                <MessageSquare className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </div>
+                          </Card>
+                        ))
+                      ) : (
+                        <Card className="p-12 text-center">
+                          <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                          <p className="text-muted-foreground">No applications received yet.</p>
+                          <p className="text-sm text-muted-foreground mt-2">
+                            Applications will appear here once candidates apply to your jobs.
+                          </p>
                         </Card>
-                      ))}
+                      )}
                     </div>
                   )}
                 </div>

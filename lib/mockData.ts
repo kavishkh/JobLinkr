@@ -280,7 +280,7 @@ export const mockJobs: Job[] = [
     applicants: 8
   },
   {
-    id: '6',
+    id: 'job-6',
     title: 'DevOps Engineer',
     company: 'CloudScale Systems',
     companyLogo: 'https://api.dicebear.com/7.x/initials/svg?seed=CS',
