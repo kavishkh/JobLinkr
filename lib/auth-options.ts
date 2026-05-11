@@ -3,6 +3,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { db, auth } from '@/lib/firebase'
 import { doc, getDoc } from 'firebase/firestore/lite'
 import { signInWithEmailAndPassword } from 'firebase/auth'
+import GoogleProvider from 'next-auth/providers/google'
 
 export const authOptions: NextAuthOptions = {
   secret:
@@ -13,6 +14,19 @@ export const authOptions: NextAuthOptions = {
     signIn: '/login',
   },
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || 'placeholder_client_id',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'placeholder_client_secret',
+      profile(profile) {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+          role: 'Seeker', // Default role for Google Sign-In
+        }
+      },
+    }),
     CredentialsProvider({
       name: 'Email',
       credentials: {

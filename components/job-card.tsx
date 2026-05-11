@@ -41,19 +41,38 @@ export function JobCard({ job }: JobCardProps) {
   const router = useRouter()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [useAiResume, setUseAiResume] = useState(true)
-  const [aiRoleType, setAiRoleType] = useState('fullstack')
+  const getDefaultRole = (title: string) => {
+    const t = title.toLowerCase()
+    if (t.includes('front')) return 'frontend'
+    if (t.includes('back')) return 'backend'
+    if (t.includes('data')) return 'data'
+    if (t.includes('design') || t.includes('ui')) return 'designer'
+    if (t.includes('devops') || t.includes('security')) return 'devops'
+    return 'fullstack'
+  }
+
+  const [aiRoleType, setAiRoleType] = useState(getDefaultRole(job.title))
   const [isApplied, setIsApplied] = useState(false)
   const [isApplying, setIsApplying] = useState(false)
   const { isSaved, toggleSaveJob } = useSavedJobs()
   const saved = isSaved(job.id)
 
+  const roleNames: Record<string, string> = {
+    frontend: 'Frontend Developer',
+    backend: 'Backend Developer',
+    fullstack: 'Full-Stack Engineer',
+    devops: 'DevOps / Platform',
+    designer: 'UI/UX Designer',
+    data: 'Data Scientist'
+  }
+
   const handleApply = async (e: React.FormEvent) => {
     e.preventDefault();
     if (useAiResume) {
       setIsApplying(true);
-      toast.info('Analyzing job requirements...');
+      toast.info(`Analyzing requirements for ${job.title}...`);
       await new Promise(r => setTimeout(r, 300));
-      toast.success('AI Resume intelligently tailored for this role!');
+      toast.success(`AI Resume intelligently tailored for ${roleNames[aiRoleType]}!`);
       await new Promise(r => setTimeout(r, 200));
       setIsApplying(false);
     } else {
