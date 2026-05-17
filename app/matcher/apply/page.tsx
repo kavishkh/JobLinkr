@@ -98,14 +98,48 @@ export default function MatcherApplyPage() {
     )
   }
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setIsSubmitting(true)
 
-    window.setTimeout(() => {
-      toast.success('Application details saved.')
+    try {
+      const jobId = searchParams.get('jobId')
+      if (!jobId) {
+        toast.error('Job ID not found')
+        setIsSubmitting(false)
+        return
+      }
+
+      const res = await fetch('/api/jobs/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId,
+          fullName: formData.fullName,
+          phone: formData.phone,
+          role: formData.role,
+          expectedPay: formData.expectedPay,
+          linkedIn: formData.linkedIn,
+          coverNote: formData.coverNote
+        })
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        toast.success('Application submitted successfully!')
+        router.push('/matcher')
+      } else if (res.status === 409) {
+        toast.error('You have already applied to this job')
+      } else {
+        toast.error(data.error || 'Failed to submit application')
+      }
+    } catch (error: any) {
+      toast.error('Error submitting application')
+      console.error(error)
+    } finally {
       setIsSubmitting(false)
-    }, 600)
+    }
   }
 
   return (

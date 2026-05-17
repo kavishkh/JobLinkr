@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { currentUser } from '@/lib/mockData'
+import { useSession, signIn } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -19,6 +19,7 @@ export function Composer({ onSubmit, userRole }: ComposerProps) {
   const [content, setContent] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
+  const { data: session } = useSession()
 
   const placeholder = userRole === 'Employer'
     ? 'Share a new job opening, company milestone, or hiring advice...'
@@ -31,12 +32,42 @@ export function Composer({ onSubmit, userRole }: ComposerProps) {
     }
 
     setIsSubmitting(true)
-    setTimeout(() => {
-      onSubmit(content)
+
+    // If user is signed in, POST to server
+    if (session?.user?.id) {
+      try {
+        const res = await fetch('/api/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content }),
+        })
+
+        if (!res.ok) throw new Error('Server error')
+
+        const created = await res.json()
+        onSubmit?.(content)
+        setContent('')
+        toast.success('Post published successfully!')
+      } catch (e) {
+        // Fallback to local behavior
+        onSubmit?.(content)
+        setContent('')
+        toast.error('Failed to publish to server — saved locally')
+      } finally {
+        setIsSubmitting(false)
+      }
+      return
+    }
+
+    // Not signed in: save locally and offer sign-in
+    try {
+      onSubmit?.(content)
       setContent('')
+      toast('Saved locally — sign in to publish to your profile', { icon: '💾' })
+      signIn()
+    } finally {
       setIsSubmitting(false)
-      toast.success('Post published successfully!')
-    }, 1000)
+    }
   }
 
   return (
@@ -46,8 +77,8 @@ export function Composer({ onSubmit, userRole }: ComposerProps) {
     )}>
       <div className="flex gap-4">
         <Avatar className="w-12 h-12 flex-shrink-0 border-2 border-background shadow-premium">
-          <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
-          <AvatarFallback className="bg-primary/5 text-primary font-bold">{currentUser.name.charAt(0)}</AvatarFallback>
+          <AvatarImage src={session?.user?.image || undefined} alt={session?.user?.name || 'User'} />
+          <AvatarFallback className="bg-primary/5 text-primary font-bold">{(session?.user?.name || '?').charAt(0)}</AvatarFallback>
         </Avatar>
 
         <div className="flex-1 min-w-0">

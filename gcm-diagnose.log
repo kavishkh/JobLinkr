@@ -1,0 +1,110 @@
+﻿Diagnose log at 2026-05-17T06:00:52Z
+
+AppPath: C:\Program Files\Git\mingw64\bin\git-credential-manager.exe
+InstallDir: C:\Program Files\Git\mingw64\bin\
+Version: 2.6.0+3c28096588f549cb46f36b552390514356830abe
+
+------------
+Diagnostic: Environment
+Skipped: False
+Success: True
+Exception: None
+Log:
+OSType: Windows
+OSVersion: 10.0 (build 26200)
+Reading environment variables... OK
+ Variables:
+HOMEPATH=\Users\HP
+DriverData=C:\Windows\System32\Drivers\DriverData
+COMPUTERNAME=LAPTOP-MO8BO8N8
+GIT_TRACE2_PARENT_SID=6d7e8ce2-f53e-4622-a324-cee59eb0638f
+MAVEN_HOME=C:\Users\HP\Downloads\apache-maven-3.9.11-bin\apache-maven-3.9.11
+OneDrive=C:\Users\HP\OneDrive
+EFC_4348_1592913036=1
+PYTHON_BASIC_REPL=1
+RegionCode=APJ
+LANG=en_US.UTF-8
+TMP=C:\Users\HP\AppData\Local\Temp
+PROCESSOR_REVISION=9a04
+USERDOMAIN_ROAMINGPROFILE=LAPTOP-MO8BO8N8
+PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC;.CPL
+USERNAME=HP
+GIT_ASKPASS=c:\Users\HP\AppData\Roaming\Code\User\globalStorage\vscode.git\askpass\493597c785d4c5cb\askpass.sh
+POWERSHELL_DISTRIBUTION_CHANNEL=MSI:Windows 10 Home Single Language
+EFC_4348_4126798990=1
+LOCALAPPDATA=C:\Users\HP\AppData\Local
+MSYSTEM=MINGW64
+TERM=xterm-256color
+PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 154 Stepping 4, GenuineIntel
+PSModulePath=C:\Users\HP\OneDrive\Documents\PowerShell\Modules;C:\Program Files\PowerShell\Modules;c:\program files\powershell\7\Modules;C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
+IntelliJ IDEA=C:\Program Files\JetBrains\IntelliJ IDEA 2025.3.2\bin
+VSCODE_PYTHON_AUTOACTIVATE_GUARD=1
+COLORTERM=truecolor
+JAVA_HOME=C:\Program Files\Java\jdk-21
+USERDOMAIN=LAPTOP-MO8BO8N8
+platformcode=KV
+Path=C:/Program Files/Git/mingw64/libexec/git-core;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\bin;C:\Users\HP\bin;C:\Program Files\PowerShell\7;c:\Users\HP\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\debugCommand;c:\Users\HP\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\copilotCli;C:\Users\HP\AppData\Local\Programs\Microsoft VS Code;C:\Program Files\Common Files\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Git\cmd;C:\Program Files\GitHub CLI\;C:\Program Files\nodejs\;C:\Users\HP\Downloads\apache-maven-3.9.11-bin\apache-maven-3.9.11\bin;C:\Program Files\MongoDB\Server\8.0\bin;C:\Program Files\MongoDB\Server\8.0\bin;C:\Program Files\PuTTY\;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\JetBrains\IntelliJ IDEA 2025.2\bin;C:\Program Files\PowerShell\7\;C:\Program Files\Java\jdk-21\bin;C:\Program Files\Common Files\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Git\cmd;C:\Program Files\GitHub CLI\;C:\Program Files\PowerShell\7\;C:\Program Files\nodejs\;C:\Program Files\Common Files\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Git\cmd;C:\Program Files\nodejs\;C:\Program Files\GitHub CLI\;C:\Users\HP\AppData\Local\Programs\Python\Python38\Scripts\;C:\Users\HP\AppData\Local\Programs\Python\Python38\;C:\Users\HP\AppData\Local\Programs\Python\Python313\Scripts\;C:\Users\HP\AppData\Local\Programs\Python\Python313\;C:\Users\HP\AppData\Local\Microsoft\WindowsApps;C:\Users\HP\AppData\Local\Programs\Microsoft VS Code\bin;C:\Program Files\MySQL\MySQL Server 8.0\bin;C:\Program Files\GitHub CLI;C:\Users\HP\AppData\Roaming\npm;C:\Program Files\MongoDB\Server\8.0\bin;C:\Program Files\JetBrains\IntelliJ IDEA 2025.3.2\bin
+TERM_PROGRAM=vscode
+PROCESSOR_LEVEL=6
+NUMBER_OF_PROCESSORS=12
+TMPDIR=C:\Users\HP\AppData\Local\Temp
+VSCODE_GIT_ASKPASS_EXTRA_ARGS=
+VSCODE_GIT_ASKPASS_NODE=C:\Users\HP\AppData\Local\Programs\Microsoft VS Code\Code.exe
+TERM_PROGRAM_VERSION=1.119.0
+VSCODE_GIT_ASKPASS_MAIN=c:\Users\HP\AppData\Roaming\Code\User\globalStorage\vscode.git\askpass\493597c785d4c5cb\askpass-main.js
+ProgramFiles(x86)=C:\Program Files (x86)
+PUBLIC=C:\Users\Public
+VSCODE_GIT_IPC_HANDLE=\\.\pipe\vscode-git-781e26d046-sock
+SESSIONNAME=Console
+CommonProgramFiles=C:\Program Files (x86)\Common Files
+GIT_EDITOR=:
+VSCODE_INJECTION=1
+GIT_MERGE_AUTOEDIT=no
+IGCCSVC_DB=AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA7N0Ytiy7mkm9o1sr2RH/dAQAAAACAAAAAAAQZgAAAAEAACAAAACGfjwFZenyoVyp8M42cZgib0Jnt4UT/E7bfMIlf7tElQAAAAAOgAAAAAIAACAAAAA3xejN9kdW4/HQj9tLlABMx0JUmQ+3V2fUeMu09IzuGmAAAADBjCIZ1we9Tl2f+haCf454mE1UpDRa2OiIpXBWIXfyMn8Wu9Ih9Co7z44p0LYprX7l9v7C4+4r148Z2r+dn2zetBgfcBO/Q2wFcBIBcxioEi+II2rXhEQZoJc4cjvp+bNAAAAAMYCsWEPZ7EFOLy7CKzQ+kHqiqgJuUPrbE0U1Vi6E/IeCVx5CMyQw7Ca3kPLzq5Gr/4SPzfWmHkVgeiayIUTSYw==
+PLINK_PROTOCOL=ssh
+ProgramData=C:\ProgramData
+ProgramW6432=C:\Program Files
+GIT_PAGER=cat
+ProgramFiles=C:\Program Files (x86)
+OnlineServices=Online Services
+SystemRoot=C:\WINDOWS
+PYTHONSTARTUP=c:\Users\HP\AppData\Roaming\Code\User\workspaceStorage\7b21435812220b4a03137c339eb8659f\ms-python.python\pythonrc.py
+HOME=C:\Users\HP
+CommonProgramW6432=C:\Program Files\Common Files
+ZES_ENABLE_SYSMAN=1
+LOGONSERVER=\\LAPTOP-MO8BO8N8
+GIT_EXEC_PATH=C:/Program Files/Git/mingw64/libexec/git-core
+CommonProgramFiles(x86)=C:\Program Files (x86)\Common Files
+APPDATA=C:\Users\HP\AppData\Roaming
+HOMEDRIVE=C:
+OPENSSL_CONF=C:\Program Files\PostgreSQL\psqlODBC\etc\openssl.cnf
+VBOX_MSI_INSTALL_PATH=C:\Program Files\Oracle\VirtualBox\
+CHROME_CRASHPAD_PIPE_NAME=\\.\pipe\crashpad_22360_CONSWBASGDAGXDED
+PROCESSOR_ARCHITEW6432=AMD64
+PROCESSOR_ARCHITECTURE=x86
+USERPROFILE=C:\Users\HP
+OS=Windows_NT
+ComSpec=C:\WINDOWS\system32\cmd.exe
+TEMP=C:\Users\HP\AppData\Local\Temp
+SystemDrive=C:
+windir=C:\WINDOWS
+OneDriveConsumer=C:\Users\HP\OneDrive
+ALLUSERSPROFILE=C:\ProgramData
+
+
+------------
+Diagnostic: File system
+Skipped: False
+Success: True
+Exception: None
+Log:
+Temporary directory is 'C:\Users\HP\AppData\Local\Temp\'...
+Checking basic file I/O...
+Writing to temporary file 'C:\Users\HP\AppData\Local\Temp\e96145789a599bf83b4f0cc9'... OK
+Reading from temporary file 'C:\Users\HP\AppData\Local\Temp\e96145789a599bf83b4f0cc9'... OK
+Deleting temporary file 'C:\Users\HP\AppData\Local\Temp\e96145789a599bf83b4f0cc9'... OK
+Testing IFileSystem instance...
+UserHomePath: C:\Users\HP
+UserDataDirectoryPath: C:\Users\HP\.gcm
+GetCurrentDirectory(): C:\Users\HP\Desktop\hazel\JobLinkr
+

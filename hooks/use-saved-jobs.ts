@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
+import { useSession } from 'next-auth/react'
 import { mockJobs } from '@/lib/mockData'
 
 export interface SavedJobEntry {
@@ -34,55 +35,39 @@ function safeWriteSavedJobs(payload: SavedJobEntry[]) {
 
 export function useSavedJobs() {
   const [savedJobs, setSavedJobs] = useState<SavedJobEntry[]>([])
+  const { data: session } = useSession()
 
   const catalogJobIds = new Set(mockJobs.map((job) => job.id))
 
+  // Fetch from server when user is logged in
   useEffect(() => {
-    const rawV2 = localStorage.getItem(STORAGE_KEY)
-    if (rawV2) {
-      try {
-        const parsed = JSON.parse(rawV2)
-        if (Array.isArray(parsed)) {
-          const validated = parsed.filter(isSavedJobEntry)
-          const normalized = validated.map((entry) => {
-            const isCatalog = catalogJobIds.has(entry.id)
-            return {
-              ...entry,
-              source: isCatalog ? ('catalog' as const) : ('market' as const),
-            }
-          })
-
-          setSavedJobs(normalized)
-          safeWriteSavedJobs(normalized)
-          return
-        }
-      } catch (e) {
-        // Fall through to legacy migration.
-      }
+    if (session?.user?.email) {
+      fetchSavedJobs()
     }
+  }, [session?.user?.email])
 
-    // Migrate legacy array of job IDs into v2 format.
-    const rawLegacy = localStorage.getItem(LEGACY_STORAGE_KEY)
-    if (!rawLegacy) return
-
+  const fetchSavedJobs = async () => {
     try {
-      const parsed = JSON.parse(rawLegacy)
-      if (!Array.isArray(parsed)) return
-
-      const migrated = parsed
-        .filter((id): id is string => typeof id === 'string')
-        .map((id) => ({
-          id,
-          source: catalogJobIds.has(id) ? ('catalog' as const) : ('market' as const),
-          savedAt: new Date().toISOString(),
+      const res = await fetch('/api/saved-jobs')
+      if (res.ok) {
+        const data = await res.json()
+        const jobs = data.savedJobs || []
+        const normalized = jobs.map((j: any) => ({
+          id: j.jobId,
+          title: j.jobTitle,
+          company: j.company,
+          location: j.location,
+          description: j.description,
+          savedAt: j.createdAt,
+          source: catalogJobIds.has(j.jobId) ? ('catalog' as const) : ('market' as const),
         }))
-
-      setSavedJobs(migrated)
-      safeWriteSavedJobs(migrated)
-    } catch (e) {
-      // Ignore malformed legacy payloads.
+        setSavedJobs(normalized)
+        safeWriteSavedJobs(normalized)
+      }
+    } catch (error) {
+      console.error('Failed to fetch saved jobs:', error)
     }
-  }, [])
+  }
 
   const persistSavedJobs = (next: SavedJobEntry[]) => {
     setSavedJobs(next)
@@ -92,43 +77,85 @@ export function useSavedJobs() {
     }
   }
 
-  const upsertSavedJob = (jobId: string, jobData?: Partial<SavedJobEntry>) => {
+  const upsertSavedJob = async (jobId: string, jobData?: Partial<SavedJobEntry>) => {
     if (!jobId) return
     if (savedJobs.some((entry) => entry.id === jobId)) return
 
-    const next: SavedJobEntry[] = [
-      {
-        id: jobId,
-        source: jobData?.source || 'catalog',
-        savedAt: new Date().toISOString(),
-        ...jobData,
-      },
-      ...savedJobs,
-    ]
-
-    persistSavedJobs(next)
+    // If user is logged in, save to server
+    if (session?.user?.email) {
+      try {
+        const res = await fetch('/api/saved-jobs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jobId,
+            jobTitle: jobData?.title,
+            company: jobData?.company,
+            location: jobData?.location,
+            description: jobData?.description,
+          }),
+        })
+        if (res.ok) {
+          await fetchSavedJobs()
+          toast.success('Job saved!')
+        } else {
+          toast.error('Failed to save job')
+        }
+      } catch (error) {
+        console.error('Failed to save job:', error)
+        toast.error('Failed to save job')
+      }
+    } else {
+      // Fallback to localStorage for unauthenticated users
+      const next: SavedJobEntry[] = [
+        {
+          id: jobId,
+          source: jobData?.source || 'catalog',
+          savedAt: new Date().toISOString(),
+          ...jobData,
+        },
+        ...savedJobs,
+      ]
+      persistSavedJobs(next)
+    }
   }
 
-  const removeSavedJob = (jobId: string) => {
-    const next = savedJobs.filter((entry) => entry.id !== jobId)
-    persistSavedJobs(next)
+  const removeSavedJob = async (jobId: string) => {
+    // If user is logged in, delete from server
+    if (session?.user?.email) {
+      try {
+        const res = await fetch('/api/saved-jobs', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ jobId }),
+        })
+        if (res.ok) {
+          await fetchSavedJobs()
+          toast.success('Job removed from saved')
+        }
+      } catch (error) {
+        console.error('Failed to remove job:', error)
+        toast.error('Failed to remove job')
+      }
+    } else {
+      // Fallback to localStorage
+      const next = savedJobs.filter((entry) => entry.id !== jobId)
+      persistSavedJobs(next)
+    }
   }
 
   const toggleSaveJob = (jobId: string, jobData?: Partial<SavedJobEntry>) => {
     if (savedJobs.some((entry) => entry.id === jobId)) {
       removeSavedJob(jobId)
-      toast.success('Job removed from saved list')
       return
     }
 
     upsertSavedJob(jobId, jobData)
-    toast.success('Job saved successfully')
   }
 
   const saveJob = (jobId: string, jobData?: Partial<SavedJobEntry>) => {
     if (savedJobs.some((entry) => entry.id === jobId)) return
     upsertSavedJob(jobId, jobData)
-    toast.success('Job saved to your matches!')
   }
 
   const savedJobIds = savedJobs.map((entry) => entry.id)

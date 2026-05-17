@@ -1,34 +1,30 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-options'
-
-// In a real app, this would be stored in a database
-export let applications: Array<{
-  id: string
-  jobId: string
-  userId: string
-  status: 'Applied' | 'Under Review' | 'Rejected' | 'Accepted'
-  appliedAt: Date
-}> = []
+import dbConnect from '@/lib/mongodb'
+import { Application } from '@/lib/models/Application'
 
 export async function POST(request: Request) {
   try {
+    await dbConnect()
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
 
-    const { jobId } = await request.json()
+    const body = await request.json()
+    const { jobId, fullName, phone, role, expectedPay, linkedIn, coverNote } = body
 
     if (!jobId) {
       return NextResponse.json({ error: 'Job ID is required' }, { status: 400 })
     }
 
     // Check if user has already applied to this job
-    const existingApplication = applications.find(
-      app => app.jobId === jobId && app.userId === session.user.id
-    )
+    const existingApplication = await Application.findOne({
+      jobId,
+      userId: session.user.id
+    })
 
     if (existingApplication) {
       return NextResponse.json({
@@ -37,16 +33,21 @@ export async function POST(request: Request) {
       }, { status: 409 })
     }
 
-    // Create new application
-    const application = {
-      id: `app-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    // Create new application with form data
+    const application = new Application({
       jobId,
       userId: session.user.id,
-      status: 'Applied' as const,
-      appliedAt: new Date()
-    }
+      userEmail: session.user.email,
+      fullName: fullName || session.user.name,
+      phone,
+      role,
+      expectedPay,
+      linkedIn,
+      coverNote,
+      status: 'Applied'
+    })
 
-    applications.push(application)
+    await application.save()
 
     return NextResponse.json({
       success: true,
@@ -62,6 +63,7 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
+    await dbConnect()
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
@@ -73,16 +75,17 @@ export async function GET(request: Request) {
 
     if (jobId) {
       // Get application status for a specific job
-      const application = applications.find(
-        app => app.jobId === jobId && app.userId === session.user.id
-      )
+      const application = await Application.findOne({
+        jobId,
+        userId: session.user.id
+      })
 
       return NextResponse.json({ application })
     } else {
       // Get all applications for the user
-      const userApplications = applications.filter(
-        app => app.userId === session.user.id
-      )
+      const userApplications = await Application.find({
+        userId: session.user.id
+      })
 
       return NextResponse.json({ applications: userApplications })
     }

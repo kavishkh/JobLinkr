@@ -1,7 +1,8 @@
 ﻿import { NextResponse } from 'next/server'
-import { auth, db } from '../../../lib/firebase'
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
-import { doc, setDoc } from 'firebase/firestore/lite'
+import dbConnect from '../../../lib/mongodb'
+import { User } from '../../../lib/models/User'
+import { auth } from '../../../lib/firebase'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
 
 interface SignupRequestBody {
   name: string
@@ -64,53 +65,47 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid gender value.', details: 'Gender must be male or female.' }, { status: 400 })
     }
 
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-    const firebaseUser = userCredential.user
-    const displayName = `${name}|${role}`
-
+    // Create user in Firebase
+    let firebaseUid: string
     try {
-      await updateProfile(firebaseUser, { displayName })
-    } catch (profileError: any) {
-      console.warn('Failed to save displayName on Firebase Auth user:', profileError)
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      firebaseUid = userCredential.user.uid
+    } catch (firebaseError: any) {
+      if (firebaseError.code === 'auth/email-already-in-use') {
+        return NextResponse.json({ error: 'Email already in use.' }, { status: 409 })
+      }
+      throw firebaseError
     }
 
-    try {
-      const userDocRef = doc(db, 'users', firebaseUser.uid)
-      await setDoc(userDocRef, {
-        id: firebaseUser.uid,
-        name,
-        email,
-        role,
-        gender,
-        age,
-        title,
-        location,
-        bio,
-        socialLinks,
-        skills,
-        experience,
-        education,
-        createdAt: new Date().toISOString(),
-      })
-    } catch (firestoreError: any) {
-      console.warn('Failed to write user profile to Firestore:', firestoreError)
+    // Also save user profile to MongoDB
+    await dbConnect()
+    
+    const existingUser = await User.findOne({ email })
+    if (existingUser) {
+      return NextResponse.json({ error: 'Email already in use.' }, { status: 409 })
     }
+
+    const newUser = new User({
+      email,
+      passwordHash: '', // Empty since Firebase handles password
+      name,
+      role,
+      gender,
+      age,
+      headline: title,
+      location,
+      bio,
+      socialLinks,
+      skills,
+      experience,
+      education,
+    })
+
+    await newUser.save()
 
     return NextResponse.json({ message: 'User account created successfully.' }, { status: 201 })
   } catch (error: any) {
     console.error('Signup route error:', error)
-
-    if (error?.code === 'auth/email-already-in-use') {
-      return NextResponse.json({ error: 'Email already in use.' }, { status: 409 })
-    }
-
-    if (error?.code === 'auth/invalid-email') {
-      return NextResponse.json({ error: 'Invalid email address.' }, { status: 400 })
-    }
-
-    if (error?.code === 'auth/weak-password') {
-      return NextResponse.json({ error: 'Password is too weak.' }, { status: 400 })
-    }
 
     return NextResponse.json({ error: 'Could not create account.', details: error?.message ?? 'Unknown error' }, { status: 500 })
   }

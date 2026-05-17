@@ -1,6 +1,8 @@
-'use client'
+ 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { toast } from 'sonner'
 import { Composer } from '@/components/composer'
 import { PostCard } from '@/components/post-card'
 import { Post, currentUser } from '@/lib/mockData'
@@ -23,42 +25,148 @@ export function FeedContent({ initialPosts }: FeedContentProps) {
   const [posts, setPosts] = useState<Post[]>(initialPosts)
   const [loading, setLoading] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const { data: session } = useSession()
 
   useEffect(() => {
-    // Load from localStorage if available
-    const saved = localStorage.getItem('jobLinkrPosts')
-    if (saved) {
+    // Fetch posts from API
+    const load = async () => {
       try {
-        const savedPosts = JSON.parse(saved).map((p: any) => ({
-          ...p,
-          timestamp: new Date(p.timestamp)
-        }))
-        setPosts(savedPosts)
+        setLoading(true)
+        const res = await fetch('/api/posts')
+        if (res.ok) {
+          const data = await res.json()
+          const postsFromApi = (data.posts || []).map((p: any) => ({
+            id: p._id || p.id,
+            author: p.author,
+            content: p.content,
+            timestamp: p.createdAt ? new Date(p.createdAt) : new Date(),
+            likes: p.likes || 0,
+            comments: p.comments || 0,
+            shares: p.shares || 0,
+            liked: !!p.liked
+          }))
+          setPosts(postsFromApi)
+        }
       } catch (e) {
-        // Ignore parse errors
+        // ignore
+      } finally {
+        setLoading(false)
       }
     }
-  }, [])
 
-  const handleNewPost = (content: string) => {
-    const newPost: Post = {
-      id: `post-${Date.now()}`,
-      author: currentUser,
-      content,
-      timestamp: new Date(),
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      liked: false
+    load()
+
+    // If there are legacy posts in localStorage and user is signed in, migrate them
+    try {
+      const saved = localStorage.getItem('jobLinkrPosts')
+      if (saved && session?.user?.id) {
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          fetch('/api/migrate/local', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ posts: parsed })
+          }).then(async (r) => {
+            if (r.ok) {
+              localStorage.removeItem('jobLinkrPosts')
+              toast.success('Migrated your local posts to the server')
+              // reload posts after migration
+              const refetch = await fetch('/api/posts')
+              if (refetch.ok) {
+                const d = await refetch.json()
+                const postsFromApi = (d.posts || []).map((p: any) => ({
+                  id: p._id || p.id,
+                  author: p.author,
+                  content: p.content,
+                  timestamp: p.createdAt ? new Date(p.createdAt) : new Date(),
+                  likes: p.likes || 0,
+                  comments: p.comments || 0,
+                  shares: p.shares || 0,
+                  liked: !!p.liked
+                }))
+                setPosts(postsFromApi)
+              }
+            }
+          })
+        }
+      }
+    } catch (e) {
+      // ignore
     }
+  }, [session])
 
-    const updated = [newPost, ...posts]
-    setPosts(updated)
-    localStorage.setItem('jobLinkrPosts', JSON.stringify(updated))
-    setIsDialogOpen(false) // Close dialog after posting
+  const handleNewPost = async (content: string) => {
+    // Try to post to server. If unauthenticated, fallback to localStorage
+    try {
+      const res = await fetch('/api/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content })
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        const p = data.post
+        const serverPost: Post = {
+          id: p._id || p.id,
+          author: p.author,
+          content: p.content,
+          timestamp: p.createdAt ? new Date(p.createdAt) : new Date(),
+          likes: p.likes || 0,
+          comments: p.comments || 0,
+          shares: p.shares || 0,
+          liked: !!p.liked
+        }
+        setPosts([serverPost, ...posts])
+        setIsDialogOpen(false)
+        toast.success('Post published successfully!')
+        return
+      }
+
+      const err = await res.json().catch(() => null)
+      if (res.status === 401) {
+        // Fall back to local storage
+        const newPost: Post = {
+          id: `post-${Date.now()}`,
+          author: currentUser,
+          content,
+          timestamp: new Date(),
+          likes: 0,
+          comments: 0,
+          shares: 0,
+          liked: false
+        }
+        const updated = [newPost, ...posts]
+        setPosts(updated)
+        localStorage.setItem('jobLinkrPosts', JSON.stringify(updated))
+        setIsDialogOpen(false)
+        toast('Saved locally — sign in to sync')
+        return
+      }
+
+      throw new Error(err?.error || 'Post failed')
+    } catch (e: any) {
+      // Fallback to local
+      const newPost: Post = {
+        id: `post-${Date.now()}`,
+        author: currentUser,
+        content,
+        timestamp: new Date(),
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        liked: false
+      }
+      const updated = [newPost, ...posts]
+      setPosts(updated)
+      localStorage.setItem('jobLinkrPosts', JSON.stringify(updated))
+      setIsDialogOpen(false)
+      toast.error('Failed to publish — saved locally')
+    }
   }
 
-  const handleLike = (postId: string) => {
+  const handleLike = async (postId: string) => {
+    // Optimistic UI update
     setPosts(posts.map(post => {
       if (post.id === postId) {
         return {
@@ -69,6 +177,120 @@ export function FeedContent({ initialPosts }: FeedContentProps) {
       }
       return post
     }))
+
+    if (session?.user?.id) {
+      try {
+        const res = await fetch(`/api/posts/${postId}/like`, { method: 'POST' })
+        if (res.ok) {
+          const data = await res.json()
+          const p = data.post
+          setPosts(prev => prev.map(post => post.id === (p._id || p.id) ? ({
+            ...post,
+            likes: p.likes || 0,
+            liked: !!p.liked
+          }) : post))
+          return
+        }
+        throw new Error('Like failed')
+      } catch (e) {
+        // On failure, refetch posts to sync state
+        try {
+          const refetch = await fetch('/api/posts')
+          if (refetch.ok) {
+            const d = await refetch.json()
+            const postsFromApi = (d.posts || []).map((p: any) => ({
+              id: p._id || p.id,
+              author: p.author,
+              content: p.content,
+              timestamp: p.createdAt ? new Date(p.createdAt) : new Date(),
+              likes: p.likes || 0,
+              comments: p.comments || 0,
+              shares: p.shares || 0,
+              liked: !!p.liked
+            }))
+            setPosts(postsFromApi)
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+    } else {
+      // Not signed in: persist to local storage as fallback
+      const updated = posts.map(post => {
+        if (post.id === postId) {
+          return {
+            ...post,
+            liked: !post.liked,
+            likes: post.liked ? post.likes - 1 : post.likes + 1
+          }
+        }
+        return post
+      })
+      setPosts(updated)
+      try {
+        localStorage.setItem('jobLinkrPosts', JSON.stringify(updated))
+      } catch (e) {}
+    }
+  }
+
+  const handleComment = async (postId: string) => {
+    // Prompt user for comment text
+    const text = typeof window !== 'undefined' ? window.prompt('Write a comment:') : null
+    if (!text || !text.trim()) return
+
+    // Optimistic update
+    setPosts(posts.map(post => {
+      if (post.id === postId) {
+        return { ...post, comments: (post.comments || 0) + 1 }
+      }
+      return post
+    }))
+
+    if (session?.user?.id) {
+      try {
+        const res = await fetch(`/api/posts/${postId}/comments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: text })
+        })
+        if (res.ok) {
+          const data = await res.json()
+          const p = data.post
+          setPosts(prev => prev.map(post => post.id === (p._id || p.id) ? ({
+            ...post,
+            comments: p.comments || 0
+          }) : post))
+          toast.success('Comment posted')
+          return
+        }
+        throw new Error('Comment failed')
+      } catch (e) {
+        // On failure, refetch posts to reconcile
+        try {
+          const refetch = await fetch('/api/posts')
+          if (refetch.ok) {
+            const d = await refetch.json()
+            const postsFromApi = (d.posts || []).map((p: any) => ({
+              id: p._id || p.id,
+              author: p.author,
+              content: p.content,
+              timestamp: p.createdAt ? new Date(p.createdAt) : new Date(),
+              likes: p.likes || 0,
+              comments: p.comments || 0,
+              shares: p.shares || 0,
+              liked: !!p.liked
+            }))
+            setPosts(postsFromApi)
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+    } else {
+      // Not signed in: prompt to sign in and keep local increment
+      toast('Saved locally — sign in to sync', { icon: '💾' })
+      try { localStorage.setItem('jobLinkrPosts', JSON.stringify(posts)) } catch (e) {}
+    }
   }
 
   return (
@@ -124,6 +346,7 @@ export function FeedContent({ initialPosts }: FeedContentProps) {
               key={post.id}
               post={post}
               onLike={() => handleLike(post.id)}
+              onComment={() => handleComment(post.id)}
             />
           ))
         ) : (
