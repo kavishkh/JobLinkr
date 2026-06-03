@@ -1,0 +1,8 @@
+{
+  "name": "Sarah Smith",
+  "email": "sarah@example.com",
+  "password": "Password123",
+  "role": "Employer",
+  "gender": "female",
+  "age": 32
+}

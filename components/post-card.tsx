@@ -20,9 +20,10 @@ import {
 interface PostCardProps {
   post: Post
   onLike?: () => void
+  onComment?: () => void
 }
 
-export function PostCard({ post, onLike }: PostCardProps) {
+export function PostCard({ post, onLike, onComment }: PostCardProps) {
   const [showFullContent, setShowFullContent] = useState(false)
 
   const isLongContent = post.content.length > 280
@@ -137,6 +138,7 @@ export function PostCard({ post, onLike }: PostCardProps) {
           variant="ghost"
           size="sm"
           className="flex-1 gap-2 rounded-xl h-11 hover:bg-accent/5 hover:text-accent transition-all"
+          onClick={onComment}
         >
           <MessageCircle className="size-5" />
           <span className="font-bold">Comment</span>

@@ -494,7 +494,7 @@ export default function SignupPage() {
                   type="button" 
                   variant="outline" 
                   onClick={() => signIn('google', { callbackUrl: '/' })}
-                  className="w-full h-12 rounded-xl border-border/50 bg-secondary/30 hover:bg-secondary/50 font-bold transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3"
+                  className="w-full h-12 rounded-xl border-border/50 bg-secondary/30 hover:bg-secondary/50 hover:border-primary/30 hover:shadow-premium font-bold transition-all hover:scale-[1.01] active:scale-[0.98] flex items-center justify-center gap-3"
                 >
                   <svg className="size-5" viewBox="0 0 24 24">
                     <path

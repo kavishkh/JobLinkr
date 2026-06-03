@@ -2,12 +2,13 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-options'
 import { mockJobs } from '@/lib/mockData'
-
-// Import applications from the apply route (in a real app, this would be in a database)
-import { applications } from '../../jobs/apply/route'
+import dbConnect from '@/lib/mongodb'
+import { Application } from '@/lib/models/Application'
+import { User } from '@/lib/models/User'
 
 export async function GET(request: Request) {
   try {
+    await dbConnect()
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
@@ -22,27 +23,27 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const jobId = searchParams.get('jobId')
 
-    let employerApplications = applications
-
-    // Filter applications for specific job if jobId is provided
+    let query: any = {}
     if (jobId) {
-      employerApplications = applications.filter(app => app.jobId === jobId)
+      query.jobId = jobId
     }
 
-    // In a real app, you would also filter by the employer's jobs
-    // For now, return all applications (since we don't have job ownership tracking)
+    const applications = await Application.find(query)
 
-    // Add user information and job information to applications
-    const applicationsWithDetails = employerApplications.map(app => {
-      const job = mockJobs.find(j => j.id === app.jobId)
-      return {
-        ...app,
-        applicantName: `User ${app.userId.slice(-4)}`, // Mock name - in real app, fetch from users table
-        applicantEmail: `user${app.userId.slice(-4)}@example.com`, // Mock email
-        position: job?.title || 'Unknown Position',
-        company: job?.company || 'Unknown Company',
-      }
-    })
+    // Add user information to applications
+    const applicationsWithDetails = await Promise.all(
+      applications.map(async (app) => {
+        const user = await User.findById(app.userId).select('-passwordHash')
+        const job = mockJobs.find(j => j.id === app.jobId)
+        return {
+          ...app.toObject(),
+          applicantName: user?.name || `User ${app.userId.slice(-4)}`,
+          applicantEmail: user?.email || app.userEmail,
+          position: job?.title || 'Unknown Position',
+          company: job?.company || 'Unknown Company',
+        }
+      })
+    )
 
     return NextResponse.json({
       applications: applicationsWithDetails,
